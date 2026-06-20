@@ -1,6 +1,6 @@
 /**
  * gRPC Connect Body Generator
- * Generates the framed body for mine-test/Moonshot chat API requests
+ * Generates the framed body for kimi/Moonshot chat API requests
  */
 
 /**
@@ -67,7 +67,7 @@ console.log("Body 3:", JSON.stringify(body3));
 
 // // Example 4: Use in a fetch request
 // /*
-// fetch("https://www.mine-test.com/apiv2/mine-test.gateway.chat.v1.ChatService/Chat", {
+// fetch("https://www.kimi.com/apiv2/kimi.gateway.chat.v1.ChatService/Chat", {
 //     headers: {
 //         "accept": "*/*",
 //         "content-type": "application/connect+json",

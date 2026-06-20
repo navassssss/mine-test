@@ -17,7 +17,23 @@
   </details>
 </div>
 
+<!-- Send Message form placed at the top for optimal E-Ink usability -->
 <div class="content-box" style="margin-bottom: 20px;">
+  <h3>Send Message</h3>
+  <form id="message-form" action="/chat/{{chatId}}/send" method="POST">
+    <input type="hidden" name="parentId" value="{{lastMessageId}}">
+    <textarea name="message" id="message-input" rows="4" required placeholder="Type your message here..."></textarea>
+    <button type="submit" class="btn btn-refresh">Send Message</button>
+  </form>
+</div>
+
+<div class="content-box" style="margin-bottom: 20px;">
+  <!-- Streaming response sits at the top of the message stream, right below the input form -->
+  <div id="streaming-indicator" style="display: none; border-left: 3px solid #000; padding-left: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px dashed #000;">
+    <div class="message-role" style="font-weight: bold;">assistant (streaming...)</div>
+    <div id="streaming-content" class="message-content"></div>
+  </div>
+
   <div id="messages-container">
     {{#if messages}}
       {{#each messages}}
@@ -30,19 +46,6 @@
       <p>No messages in this chat yet.</p>
     {{/if}}
   </div>
-  <div id="streaming-indicator" style="display: none; border-left: 3px solid #000; padding-left: 8px;">
-    <div class="message-role" style="font-weight: bold;">assistant (streaming...)</div>
-    <div id="streaming-content" class="message-content"></div>
-  </div>
-</div>
-
-<div class="content-box">
-  <h3>Send Message</h3>
-  <form id="message-form" action="/chat/{{chatId}}/send" method="POST">
-    <input type="hidden" name="parentId" value="{{lastMessageId}}">
-    <textarea name="message" id="message-input" rows="4" required placeholder="Type your message here..."></textarea>
-    <button type="submit" class="btn btn-refresh">Send Message</button>
-  </form>
 </div>
 
 <script>
@@ -63,12 +66,16 @@
       const userMsgDiv = document.createElement('div');
       userMsgDiv.className = 'message message-user';
       userMsgDiv.innerHTML = '<div class="message-role">user</div><div class="message-content">' + messageText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
-      messagesContainer.appendChild(userMsgDiv);
+      
+      // Prepend to messages container (since messages are in newest-first order)
+      messagesContainer.insertBefore(userMsgDiv, messagesContainer.firstChild);
       
       input.value = '';
       streamingContent.innerHTML = '';
       streamingIndicator.style.display = 'block';
-      window.scrollTo(0, document.body.scrollHeight);
+      
+      // Scroll to top of the message stream
+      window.scrollTo(0, 0);
 
       try {
         const formData = new FormData(form);
@@ -96,7 +103,7 @@
           const chunk = decoder.decode(value);
           assistantText += chunk;
           streamingContent.innerHTML = assistantText.replace(/\n/g, '<br>');
-          window.scrollTo(0, document.body.scrollHeight);
+          window.scrollTo(0, 0);
         }
 
         window.location.reload();
@@ -107,4 +114,7 @@
       }
     });
   }
+
+  // Scroll to the top on page load so the newest content and send box are immediately visible
+  window.scrollTo(0, 0);
 </script>

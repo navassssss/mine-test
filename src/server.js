@@ -306,6 +306,21 @@ app.post('/chat/new', async (req, res) => {
   }
 });
 
+// Helper to rewrite file links (e.g. sandbox://) to our proxy URL with options to Open and Download
+function rewriteFileLinks(html, chatId) {
+  if (!html) return html;
+  const regex = /<a href="(sandbox:\/\/[^"]+)">([\s\S]*?)<\/a>/g;
+  return html.replace(regex, (match, uri, text) => {
+    const encodedUri = encodeURIComponent(uri);
+    return `
+      <span class="file-links-group" style="display: inline-flex; gap: 6px; margin: 4px 0; vertical-align: middle;">
+        <a href="/chat/${chatId}/file?uri=${encodedUri}" target="_blank" class="btn" style="padding: 4px 8px; font-size: 0.85rem; margin: 0;">Open: ${text} ↗</a>
+        <a href="/chat/${chatId}/file?uri=${encodedUri}&download=1" class="btn btn-refresh" style="padding: 4px 8px; font-size: 0.85rem; margin: 0;">Download ⬇</a>
+      </span>
+    `;
+  });
+}
+
 // 6. View Chat Room Route
 app.get('/chat/:id', async (req, res) => {
   const chatId = req.params.id;
@@ -334,23 +349,31 @@ app.get('/chat/:id', async (req, res) => {
       const msgRes = await api.listMessages(chatId, 100);
       const apiMessages = msgRes.messages || [];
 
-      // Format messages in chronological order (oldest first)
-      const chronologicalMessages = [...apiMessages].reverse();
-      pageData.messages = chronologicalMessages.map(msg => {
+      // Format messages in reverse chronological order (newest first)
+      const reverseChronologicalMessages = [...apiMessages];
+      pageData.messages = reverseChronologicalMessages.map(msg => {
         let content = '';
         if (msg.blocks) {
           msg.blocks.forEach(block => {
             if (block.text && block.text.content) {
               content += block.text.content;
             } else if (block.file && block.file.meta) {
-              content += `\n*[Attached Document: ${block.file.meta.name}]*`;
+              const fileUri = block.file.uri || (block.file.meta && block.file.meta.uri) || '';
+              if (fileUri) {
+                content += `\n[Attached Document: ${block.file.meta.name}](${fileUri})`;
+              } else {
+                content += `\n*[Attached Document: ${block.file.meta.name}]*`;
+              }
             }
           });
         }
 
+        const htmlContent = marked.parse(content);
+        const resolvedHtml = rewriteFileLinks(htmlContent, chatId);
+
         return {
           role: msg.role === 'user' ? 'user' : 'assistant',
-          content: marked.parse(content)
+          content: resolvedHtml
         };
       });
 
@@ -484,11 +507,59 @@ app.post('/chat/:id/edit', async (req, res) => {
   res.redirect(`/chat/${chatId}`);
 });
 
+// 10. File Resolution and Download/View Proxy Route
+app.get('/chat/:id/file', async (req, res) => {
+  const chatId = req.params.id;
+  const fileUri = req.query.uri;
+  const downloadMode = req.query.download === '1';
+
+  if (!fileUri) {
+    return res.status(400).send('Missing file uri parameter.');
+  }
+
+  try {
+    console.log(`Resolving file URI: ${fileUri} for chat: ${chatId}`);
+    const result = await api.resolveFileUri(chatId, fileUri);
+
+    console.log('ResolveFileURI response:', JSON.stringify(result));
+    const resolvedUrl = result.url || result.resolved_url || result.resolvedUrl || result.file_url || result.fileUrl || result.downloadUrl || result.download_url;
+    if (!resolvedUrl) {
+      throw new Error('ResolveFileURI response did not contain a valid URL.');
+    }
+
+    if (downloadMode) {
+      const fileRes = await fetch(resolvedUrl);
+      if (!fileRes.ok) {
+        throw new Error(`Failed to fetch file from resolved URL: ${fileRes.statusText}`);
+      }
+
+      let filename = 'file';
+      try {
+        const u = new URL(resolvedUrl);
+        filename = u.pathname.split('/').pop() || 'file';
+      } catch (e) {
+        filename = fileUri.split('/').pop() || 'file';
+      }
+
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Type', fileRes.headers.get('content-type') || 'application/octet-stream');
+
+      const fileBuffer = await fileRes.arrayBuffer();
+      res.send(Buffer.from(fileBuffer));
+    } else {
+      res.redirect(resolvedUrl);
+    }
+  } catch (error) {
+    console.error('Error resolving file URI:', error);
+    res.status(500).send(`Failed to resolve file: ${error.message}`);
+  }
+});
+
 // Start the server
 const PORT = config.PORT;
 app.listen(PORT, () => {
   console.log(`=================================================`);
-  console.log(`Kindle-friendly mine-test Web App started!`);
+  console.log(`Kindle-friendly kimi Web App started!`);
   console.log(`Access the client interface locally at:`);
   console.log(`http://localhost:${PORT}`);
   console.log(`=================================================`);

@@ -1,7 +1,7 @@
 {
-  "name": "mine-test-kindle-client",
+  "name": "kimi-kindle-client",
   "version": "1.0.0",
-  "description": "Kindle-optimized client for mine-test.com API",
+  "description": "Kindle-optimized client for kimi.com API",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

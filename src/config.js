@@ -7,7 +7,7 @@ dotenv.config();
 const envPath = path.resolve(process.cwd(), '.env');
 
 export const config = {
-  MINE_TEST_DOMAIN: process.env.MINE_TEST_DOMAIN || 'www.mine-test.com',
+  MINE_TEST_DOMAIN: process.env.MINE_TEST_DOMAIN || 'www.kimi.com',
   BEARER_TOKEN: process.env.BEARER_TOKEN || '',
   MINE_TEST_AUTH_COOKIE: process.env.MINE_TEST_AUTH_COOKIE || '',
   X_MSH_SESSION_ID: process.env.X_MSH_SESSION_ID || '1731642852852109865',

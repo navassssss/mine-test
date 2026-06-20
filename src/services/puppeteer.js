@@ -27,7 +27,7 @@ export async function refreshTokens() {
 
     const domain = config.MINE_TEST_DOMAIN;
     const cookieDomain = `.${domain.replace('www.', '')}`;
-    const brand = domain.includes('mine-test') ? 'mine-test' : 'mine-test';
+    const brand = domain.includes('kimi') ? 'kimi' : 'kimi';
 
     console.log(`Setting authentication cookies for domain: ${cookieDomain} with brand: ${brand}`);
 

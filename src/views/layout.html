@@ -4,181 +4,270 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{title}} - mine-test Kindle Client</title>
+  <title>{{title}} - kimi Kindle Client</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Outfit:wght@300..800&display=swap"
+    rel="stylesheet">
   <style>
+    :root {
+      --bg-color: #fdfbf7;
+      --text-color: #1e1e1e;
+      --primary-color: #1a1a1a;
+      --border-color: #2a2a2a;
+      --card-bg: #ffffff;
+      --meta-color: #666666;
+      --accent-bg: #f5f2eb;
+      --user-msg-bg: #ffffff;
+      --assistant-msg-bg: #f9f7f2;
+    }
+
+    /* Dark Mode (supported if browser matches media query) */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #121212;
+        --text-color: #e0e0e0;
+        --primary-color: #ffffff;
+        --border-color: #e0e0e0;
+        --card-bg: #1e1e1e;
+        --meta-color: #aaaaaa;
+        --accent-bg: #2a2a2a;
+        --user-msg-bg: #1e1e1e;
+        --assistant-msg-bg: #252525;
+      }
+    }
+
     body {
-      font-family: Georgia, serif;
-      background-color: #ffffff;
-      color: #000000;
+      font-family: 'Lora', Georgia, serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
       margin: 0;
-      padding: 12px;
-      line-height: 1.4;
+      padding: 16px;
+      line-height: 1.6;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
 
     header {
-      border-bottom: 2px solid #000000;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+      padding-bottom: 12px;
+      margin-bottom: 20px;
     }
 
     h1,
     h2,
     h3 {
-      margin: 0 0 8px 0;
-      font-weight: bold;
-      color: #000000;
+      font-family: 'Outfit', -apple-system, sans-serif;
+      margin: 0 0 10px 0;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 4px;
+      margin-top: 10px;
     }
 
     .nav {
-      margin-bottom: 12px;
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
     .nav a,
     .btn {
       display: inline-block;
-      padding: 8px 14px;
-      border: 2px solid #000000;
-      background-color: #ffffff;
-      color: #000000;
+      padding: 10px 18px;
+      border: 1.5px solid var(--border-color);
+      background-color: var(--card-bg);
+      color: var(--text-color);
       text-decoration: none;
-      font-weight: bold;
-      margin-right: 6px;
-      margin-bottom: 6px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 4px;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .nav a:active,
-    .btn:active {
-      background-color: #000000;
-      color: #ffffff;
+    .nav a:hover,
+    .btn:hover {
+      background-color: var(--primary-color);
+      color: var(--bg-color);
     }
 
     .btn-refresh {
-      background-color: #000000;
-      color: #ffffff;
+      background-color: var(--primary-color);
+      color: var(--bg-color);
+    }
+
+    .btn-refresh:hover {
+      background-color: var(--card-bg);
+      color: var(--text-color);
     }
 
     .content-box {
-      border: 2px solid #000000;
-      padding: 12px;
-      margin-bottom: 12px;
+      background-color: var(--card-bg);
+      border: 1.5px solid var(--border-color);
+      padding: 20px;
+      margin-bottom: 16px;
+      border-radius: 6px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.03);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
+      font-family: 'Outfit', sans-serif;
+      table-layout: fixed;
     }
 
     th,
     td {
-      border: 1px solid #000000;
-      padding: 8px;
+      border: 1px solid var(--border-color);
+      padding: 12px;
       text-align: left;
+      word-break: break-all;
+      word-wrap: break-word;
     }
 
     th {
-      background-color: #f0f0f0;
-      font-weight: bold;
+      background-color: var(--accent-bg);
+      font-weight: 700;
     }
 
     .chat-item {
       display: block;
-      border: 2px solid #000000;
-      padding: 12px;
+      background-color: var(--card-bg);
+      border: 1.5px solid var(--border-color);
+      padding: 16px;
       text-decoration: none;
-      color: #000000;
-      margin-bottom: 8px;
+      color: var(--text-color);
+      margin-bottom: 12px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .chat-item:active {
-      background-color: #f0f0f0;
+    .chat-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
     }
 
     .chat-item-title {
-      font-size: 1.1em;
-      font-weight: bold;
-      margin-bottom: 4px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15em;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
 
     .chat-item-meta {
       font-size: 0.85em;
+      color: var(--meta-color);
     }
 
     .message {
-      margin-bottom: 14px;
-      padding-bottom: 14px;
-      border-bottom: 1px dashed #000000;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border-color);
     }
 
     .message-role {
-      font-weight: bold;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
       text-transform: uppercase;
-      font-size: 0.9em;
-      margin-bottom: 4px;
+      font-size: 0.8em;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+      color: var(--meta-color);
     }
 
     .message-content {
-      font-size: 1.05em;
+      font-size: 1.1em;
+      line-height: 1.7;
+      word-break: break-word;
+      word-wrap: break-word;
     }
 
     .message-user {
-      border-left: 3px solid #000000;
-      padding-left: 8px;
+      border-left: 4px solid var(--primary-color);
+      padding-left: 14px;
+      background-color: var(--user-msg-bg);
     }
 
     .message-assistant {
-      background-color: #f9f9f9;
-      padding: 8px;
-      border: 1px solid #cccccc;
+      background-color: var(--assistant-msg-bg);
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
     }
 
     input[type="text"],
     textarea,
     select {
       width: 100%;
-      padding: 10px;
-      border: 2px solid #000000;
+      padding: 12px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 4px;
       box-sizing: border-box;
+      font-family: 'Lora', serif;
       font-size: 16px;
-      margin-bottom: 10px;
-      background-color: #ffffff;
-      color: #000000;
+      margin-bottom: 14px;
+      background-color: var(--card-bg);
+      color: var(--text-color);
+    }
+
+    select {
+      font-family: 'Outfit', sans-serif;
     }
 
     label {
-      font-weight: bold;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
       display: block;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .alert {
-      border: 2px solid #000000;
-      padding: 8px;
-      margin-bottom: 12px;
+      border: 1.5px solid var(--border-color);
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 4px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
     }
 
     .alert-success {
-      background-color: #f0f0f0;
+      background-color: var(--accent-bg);
     }
 
     .alert-error {
-      background-color: #ffffff;
-      border-style: dotted;
-    }
-
-    .message-content p {
-      margin: 0 0 8px 0;
-    }
-
-    .message-content p:last-child {
-      margin-bottom: 0;
+      background-color: var(--card-bg);
+      border-style: dashed;
     }
 
     .message-content pre {
-      background-color: #f3f3f3;
-      border: 1px solid #000000;
-      padding: 8px;
+      background-color: var(--accent-bg);
+      border: 1.5px solid var(--border-color);
+      border-radius: 4px;
+      padding: 12px;
       overflow-x: auto;
       font-family: monospace;
       font-size: 0.9em;
@@ -187,15 +276,21 @@
 
     .message-content code {
       font-family: monospace;
-      background-color: #f3f3f3;
-      padding: 2px 4px;
+      background-color: var(--accent-bg);
+      padding: 3px 6px;
+      border-radius: 3px;
+    }
+
+    details summary {
+      font-family: 'Outfit', sans-serif;
+      outline: none;
     }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>mine-test E-Ink Chat</h1>
+    <h1>kimi E-Ink Chat</h1>
     <div class="nav">
       <a href="/">Chats</a>
       <a href="/settings">Settings</a>

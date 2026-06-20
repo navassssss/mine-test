@@ -14,7 +14,7 @@ function updateCookieTimestamps(baseCookieStr) {
 
 function getBrand() {
   const domain = config.MINE_TEST_DOMAIN.toLowerCase();
-  return domain.includes('mine-test') ? 'mine-test' : 'mine-test';
+  return domain.includes('kimi') ? 'kimi' : 'kimi';
 }
 
 function getCookies() {
@@ -252,4 +252,25 @@ export async function updateChatName(chatId, newName) {
   }
 
   return await res.json();
+}
+
+export async function resolveFileUri(chatId, fileUri) {
+  const brand = getBrand();
+  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.mcp.v1.OKCService/ResolveFileURI`;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: getHeaders(false, chatId),
+    body: JSON.stringify({
+      chat_id: chatId,
+      file_uri: fileUri
+    })
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
+  }
+
+  return await res.json(); // should return { url: "..." }
 }

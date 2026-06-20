@@ -1,0 +1,39 @@
+<div class="content-box">
+  <h3>User Session</h3>
+  <p><strong>Nickname:</strong> {{userNickname}} | <strong>User ID:</strong> {{userId}}</p>
+</div>
+
+<div class="content-box">
+  <h3>Start New Conversation</h3>
+  <form action="/chat/new" method="POST">
+    <label for="model">Select Model:</label>
+    <select name="model" id="model">
+      {{#each models}}
+      <option value="{{key}}">{{displayName}} - {{description}}</option>
+      {{/each}}
+      <option value="k2d6" selected>K2.6 Instant - Quick response</option>
+      <option value="k2d6-thinking">K2.6 Thinking - Deep thinking for complex questions</option>
+      <option value="k2d6-agent">K2.6 Agent - Research, slides, sheets</option>
+      <option value="k2d6-agent-ultra">K2.6 Agent Swarm - Large-scale search</option>
+    </select>
+    
+    <label for="message">First Message:</label>
+    <textarea name="message" id="message" rows="3" required placeholder="Type your message here..."></textarea>
+    
+    <button type="submit" class="btn btn-refresh">Start Chat</button>
+  </form>
+</div>
+
+<h3>Recent Conversations</h3>
+{{#if chats}}
+  {{#each chats}}
+  <a href="/chat/{{id}}" class="chat-item">
+    <div class="chat-item-title">{{name}}</div>
+    <div class="chat-item-meta">
+      Updated: {{updateTime}} | ID: {{id}}
+    </div>
+  </a>
+  {{/each}}
+{{else}}
+  <p>No active conversations found. Use the form above to start one.</p>
+{{/if}}

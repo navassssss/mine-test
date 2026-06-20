@@ -1,0 +1,110 @@
+<h2>Chat: {{chatName}}</h2>
+<p><small>ID: {{chatId}}</small></p>
+
+<div class="content-box" style="margin-bottom: 20px;">
+  <details>
+    <summary style="font-weight: bold; cursor: pointer;">Manage Conversation (Rename / Delete)</summary>
+    <div style="margin-top: 10px; border-top: 1px dashed #000000; padding-top: 10px;">
+      <form action="/chat/{{chatId}}/edit" method="POST" style="margin-bottom: 10px;">
+        <label for="chat-name-input" style="font-weight: bold;">Rename Chat:</label>
+        <input type="text" name="name" id="chat-name-input" value="{{chatName}}" required style="width: 70%; display: inline-block; margin-right: 6px;">
+        <button type="submit" class="btn" style="display: inline-block; vertical-align: top;">Rename</button>
+      </form>
+      <form action="/chat/{{chatId}}/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete this chat? This cannot be undone.');">
+        <button type="submit" class="btn btn-refresh">Delete Chat</button>
+      </form>
+    </div>
+  </details>
+</div>
+
+<div class="content-box" style="margin-bottom: 20px;">
+  <div id="messages-container">
+    {{#if messages}}
+      {{#each messages}}
+      <div class="message message-{{role}}">
+        <div class="message-role">{{role}}</div>
+        <div class="message-content">{{{content}}}</div>
+      </div>
+      {{/each}}
+    {{else}}
+      <p>No messages in this chat yet.</p>
+    {{/if}}
+  </div>
+  <div id="streaming-indicator" style="display: none; border-left: 3px solid #000; padding-left: 8px;">
+    <div class="message-role" style="font-weight: bold;">assistant (streaming...)</div>
+    <div id="streaming-content" class="message-content"></div>
+  </div>
+</div>
+
+<div class="content-box">
+  <h3>Send Message</h3>
+  <form id="message-form" action="/chat/{{chatId}}/send" method="POST">
+    <input type="hidden" name="parentId" value="{{lastMessageId}}">
+    <textarea name="message" id="message-input" rows="4" required placeholder="Type your message here..."></textarea>
+    <button type="submit" class="btn btn-refresh">Send Message</button>
+  </form>
+</div>
+
+<script>
+  const form = document.getElementById('message-form');
+  const input = document.getElementById('message-input');
+  const messagesContainer = document.getElementById('messages-container');
+  const streamingIndicator = document.getElementById('streaming-indicator');
+  const streamingContent = document.getElementById('streaming-content');
+
+  const canStream = typeof window.fetch === 'function' && typeof window.TextDecoder === 'function';
+
+  if (canStream) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const messageText = input.value.trim();
+      if (!messageText) return;
+
+      const userMsgDiv = document.createElement('div');
+      userMsgDiv.className = 'message message-user';
+      userMsgDiv.innerHTML = '<div class="message-role">user</div><div class="message-content">' + messageText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>';
+      messagesContainer.appendChild(userMsgDiv);
+      
+      input.value = '';
+      streamingContent.innerHTML = '';
+      streamingIndicator.style.display = 'block';
+      window.scrollTo(0, document.body.scrollHeight);
+
+      try {
+        const formData = new FormData(form);
+        formData.set('message', messageText); // use the typed text
+        
+        const response = await fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            'x-requested-with': 'XMLHttpRequest'
+          },
+          body: new URLSearchParams(formData).toString()
+        });
+
+        if (!response.ok) throw new Error('Failed to send');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          assistantText += chunk;
+          streamingContent.innerHTML = assistantText.replace(/\n/g, '<br>');
+          window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        window.location.reload();
+
+      } catch (err) {
+        console.error('Streaming error:', err);
+        window.location.reload();
+      }
+    });
+  }
+</script>

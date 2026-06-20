@@ -1,0 +1,43 @@
+<h2>Configuration Settings</h2>
+<p>These values are loaded from the server's <code>.env</code> file. Changing them here will write the updates back to
+  <code>.env</code> immediately.
+</p>
+
+<div class="content-box">
+  <form action="/settings/save" method="POST">
+    <label for="MINE_TEST_DOMAIN">mine-test Domain (e.g. www.mine-test.com):</label>
+    <input type="text" name="MINE_TEST_DOMAIN" id="MINE_TEST_DOMAIN" value="{{MINE_TEST_DOMAIN}}" required>
+
+    <label for="BEARER_TOKEN">Bearer Token (JWT Authorization):</label>
+    <textarea name="BEARER_TOKEN" id="BEARER_TOKEN" rows="4" required>{{BEARER_TOKEN}}</textarea>
+
+    <label for="MINE_TEST_AUTH_COOKIE">mine-test Auth Cookie (mine-test-auth):</label>
+    <textarea name="MINE_TEST_AUTH_COOKIE" id="MINE_TEST_AUTH_COOKIE" rows="4"
+      required>{{MINE_TEST_AUTH_COOKIE}}</textarea>
+
+    <label for="X_MSH_SESSION_ID">x-msh-session-id:</label>
+    <input type="text" name="X_MSH_SESSION_ID" id="X_MSH_SESSION_ID" value="{{X_MSH_SESSION_ID}}">
+
+    <label for="X_MSH_DEVICE_ID">x-msh-device-id:</label>
+    <input type="text" name="X_MSH_DEVICE_ID" id="X_MSH_DEVICE_ID" value="{{X_MSH_DEVICE_ID}}">
+
+    <label for="X_TRAFFIC_ID">x-traffic-id:</label>
+    <input type="text" name="X_TRAFFIC_ID" id="X_TRAFFIC_ID" value="{{X_TRAFFIC_ID}}">
+
+    <label for="CF_BM">__cf_bm Cookie:</label>
+    <textarea name="CF_BM" id="CF_BM" rows="3">{{CF_BM}}</textarea>
+
+    <label for="X_MSH_SHIELD_DATA">x-msh-shield-data Header:</label>
+    <textarea name="X_MSH_SHIELD_DATA" id="X_MSH_SHIELD_DATA" rows="2">{{X_MSH_SHIELD_DATA}}</textarea>
+
+    <button type="submit" class="btn btn-refresh">Save Configuration</button>
+  </form>
+</div>
+
+<div class="content-box">
+  <h3>Session Automation</h3>
+  <p>If you get 403 / Forbidden errors or Cloudflare protection challenges, click the button below to launch a
+    background Puppeteer browser on the server. It will reload the session, solve Cloudflare challenges, and capture
+    fresh tokens automatically.</p>
+  <a href="/refresh" class="btn btn-refresh">Auto-Refresh Session via Puppeteer</a>
+</div>

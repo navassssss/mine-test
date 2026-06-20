@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} - mine-test Kindle Client</title>
+  <style>
+    body {
+      font-family: Georgia, serif;
+      background-color: #ffffff;
+      color: #000000;
+      margin: 0;
+      padding: 12px;
+      line-height: 1.4;
+    }
+
+    header {
+      border-bottom: 2px solid #000000;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 8px 0;
+      font-weight: bold;
+      color: #000000;
+    }
+
+    .nav {
+      margin-bottom: 12px;
+    }
+
+    .nav a,
+    .btn {
+      display: inline-block;
+      padding: 8px 14px;
+      border: 2px solid #000000;
+      background-color: #ffffff;
+      color: #000000;
+      text-decoration: none;
+      font-weight: bold;
+      margin-right: 6px;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+
+    .nav a:active,
+    .btn:active {
+      background-color: #000000;
+      color: #ffffff;
+    }
+
+    .btn-refresh {
+      background-color: #000000;
+      color: #ffffff;
+    }
+
+    .content-box {
+      border: 2px solid #000000;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 12px;
+    }
+
+    th,
+    td {
+      border: 1px solid #000000;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+
+    .chat-item {
+      display: block;
+      border: 2px solid #000000;
+      padding: 12px;
+      text-decoration: none;
+      color: #000000;
+      margin-bottom: 8px;
+    }
+
+    .chat-item:active {
+      background-color: #f0f0f0;
+    }
+
+    .chat-item-title {
+      font-size: 1.1em;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .chat-item-meta {
+      font-size: 0.85em;
+    }
+
+    .message {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px dashed #000000;
+    }
+
+    .message-role {
+      font-weight: bold;
+      text-transform: uppercase;
+      font-size: 0.9em;
+      margin-bottom: 4px;
+    }
+
+    .message-content {
+      font-size: 1.05em;
+    }
+
+    .message-user {
+      border-left: 3px solid #000000;
+      padding-left: 8px;
+    }
+
+    .message-assistant {
+      background-color: #f9f9f9;
+      padding: 8px;
+      border: 1px solid #cccccc;
+    }
+
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #000000;
+      box-sizing: border-box;
+      font-size: 16px;
+      margin-bottom: 10px;
+      background-color: #ffffff;
+      color: #000000;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .alert {
+      border: 2px solid #000000;
+      padding: 8px;
+      margin-bottom: 12px;
+    }
+
+    .alert-success {
+      background-color: #f0f0f0;
+    }
+
+    .alert-error {
+      background-color: #ffffff;
+      border-style: dotted;
+    }
+
+    .message-content p {
+      margin: 0 0 8px 0;
+    }
+
+    .message-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .message-content pre {
+      background-color: #f3f3f3;
+      border: 1px solid #000000;
+      padding: 8px;
+      overflow-x: auto;
+      font-family: monospace;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+    }
+
+    .message-content code {
+      font-family: monospace;
+      background-color: #f3f3f3;
+      padding: 2px 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>mine-test E-Ink Chat</h1>
+    <div class="nav">
+      <a href="/">Chats</a>
+      <a href="/settings">Settings</a>
+      <a href="/refresh" class="btn-refresh">Refresh Session</a>
+    </div>
+  </header>
+
+  {{#if flashMessage}}
+  <div class="alert {{flashType}}">
+    {{flashMessage}}
+  </div>
+  {{/if}}
+
+  {{{body}}}
+</body>
+
+</html>

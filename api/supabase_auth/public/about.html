@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us - Mine Kimi API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .content-section {
+      max-width: 900px;
+      margin: 6rem auto;
+      padding: 0 2rem;
+    }
+    .page-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .page-intro {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    .about-card-space {
+      margin-bottom: 2.5rem;
+    }
+    .premium-card h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 1.25rem;
+      color: #fff;
+    }
+    .premium-card p {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .pillar-item {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.75rem;
+      transition: all 0.25s ease;
+    }
+    .pillar-item:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-2px);
+    }
+    .pillar-icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.75rem;
+    }
+    .pillar-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+    .pillar-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/docs">Documentation</a>
+        <a href="/models">Models</a>
+        <a href="/about" class="active">About</a>
+        <a href="/login" class="btn-primary">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="content-section">
+    <h1 class="page-title">About <span class="gradient-text">Our Platform</span></h1>
+    <p class="page-intro">Learn how our gateway delivers high-performance access to advanced LLMs.</p>
+
+    <div class="premium-card about-card-space">
+      <h2>The Mission</h2>
+      <p style="margin-bottom: 0;">Mine Kimi API was built to democratize high-concurrency developer access to Kimi's advanced LLMs. Official channels lack robust session handling and failover systems that developers need to build mission-critical products. We bridge this gap by introducing a self-healing API Gateway.</p>
+    </div>
+
+    <div class="premium-card about-card-space">
+      <h2>Our Pillars of Operation</h2>
+      <p>We build our gateway infrastructure on core engineering principles focused on maximum throughput, uptime, and developer experience.</p>
+      
+      <div class="pillars-grid">
+        <div class="pillar-item">
+          <div class="pillar-icon">🔄</div>
+          <div class="pillar-title">Resilient Session Pools</div>
+          <div class="pillar-desc">Auto-refreshing session rotators guarantee uninterrupted gateway access, recovering from token expiries silently in the background.</div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-icon">⚡</div>
+          <div class="pillar-title">Zero-Overhead Cache</div>
+          <div class="pillar-desc">Custom memory-optimized parent tracking maps context chains instantly to achieve low stream start latency.</div>
+        </div>
+        <div class="pillar-item">
+          <div class="pillar-icon">🛠️</div>
+          <div class="pillar-title">Developer-First Control</div>
+          <div class="pillar-desc">Comprehensive console widgets, live quota tracking, and detailed code sandbox integrations.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="premium-card about-card-space">
+      <h2>The Vision</h2>
+      <p style="margin-bottom: 0;">Shaping the future of high-frequency model proxies. We provide developers with a rock-solid, production-ready foundation to orchestrate reasoning agents, web search flows, and deep crawls without session-level maintenance.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>API Gateway Online</span>
+      </div>
+      <div class="footer-links">
+        <a href="/docs">Docs</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Supabase & Auth Navbar integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/navbar.js"></script>
+</body>
+</html>

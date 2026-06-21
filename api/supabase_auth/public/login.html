@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Sign In - Mine Kimi API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/docs">Documentation</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+        <a href="/login" class="btn-primary">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="auth-page-wrapper">
+    <div class="auth-container">
+      <div class="auth-header">
+        <h1>Welcome Back</h1>
+        <p>Sign in to manage your session</p>
+      </div>
+
+      <div id="alert-box" class="alert"></div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" placeholder="john@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <label style="margin-bottom: 0;">Password</label>
+            <a href="/forgot-password" style="font-size: 0.85rem; color: var(--accent-primary); text-decoration: none;">Forgot password?</a>
+          </div>
+          <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn-submit" id="btn-submit">Sign In</button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="/register">Register Here</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>API Gateway Online</span>
+      </div>
+      <div class="footer-links">
+        <a href="/docs">Docs</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    // Handle redirect/error parameters from query string
+    window.addEventListener('load', () => {
+      // Check if user already logged in and verified
+      checkAuth(false);
+
+      const params = new URLSearchParams(window.location.search);
+      const alertBox = document.getElementById('alert-box');
+      
+      if (params.get('error') === 'unverified') {
+        alertBox.innerText = 'Your email address is not verified yet. Please check your inbox for the confirmation email.';
+        alertBox.className = 'alert alert-error';
+        alertBox.style.display = 'block';
+      } else if (params.get('error') === 'unauthorized') {
+        alertBox.innerText = 'Authentication required. Please sign in first.';
+        alertBox.className = 'alert alert-error';
+        alertBox.style.display = 'block';
+      } else if (params.get('reset') === 'success') {
+        alertBox.innerText = 'Password reset instructions sent! Check your inbox.';
+        alertBox.className = 'alert alert-success';
+        alertBox.style.display = 'block';
+      } else if (params.get('updated') === 'success') {
+        alertBox.innerText = 'Password updated successfully! Sign in with your new password.';
+        alertBox.className = 'alert alert-success';
+        alertBox.style.display = 'block';
+      }
+    });
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const alertBox = document.getElementById('alert-box');
+      const submitBtn = document.getElementById('btn-submit');
+      
+      alertBox.className = 'alert';
+      alertBox.style.display = 'none';
+
+      submitBtn.innerText = 'Signing in...';
+      submitBtn.disabled = true;
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const client = await getSupabaseClient();
+        
+        // Authenticate user credentials
+        const { data, error } = await client.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+
+        const user = data.user;
+        
+        // Requirement check: users cannot access protected pages until email verified
+        if (!user.email_confirmed_at) {
+          // Instantly sign out to clean up session cookies/local storage
+          await client.auth.signOut();
+          window.location.href = '/login?error=unverified';
+          return;
+        }
+
+        // Redirect to dashboard page
+        window.location.href = '/dashboard';
+      } catch (err) {
+        console.error(err);
+        alertBox.innerText = err.message || 'Invalid email or password.';
+        alertBox.className = 'alert alert-error';
+        alertBox.style.display = 'block';
+      } finally {
+        submitBtn.innerText = 'Sign In';
+        submitBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>

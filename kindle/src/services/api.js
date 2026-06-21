@@ -1,4 +1,62 @@
+// src/services/api.js
+// Client API operations for the Kindle-friendly Web App, configured with connection retries, dynamic session.json reading, and self-healing token rotation.
+
 import { config } from '../config.js';
+import { Agent } from 'undici';
+import { sessionStore } from '../../sessionStore.js';
+
+const customAgent = new Agent({
+  connect: {
+    timeout: 60000 // 60 seconds connection timeout
+  }
+});
+
+async function fetchWithRetry(url, optionsOrFn, retries = 3, delay = 1500) {
+  let lastError = null;
+  for (let i = 0; i < retries; i++) {
+    try {
+      const options = typeof optionsOrFn === 'function' ? optionsOrFn() : optionsOrFn;
+      
+      const res = await fetch(url, {
+        ...options,
+        dispatcher: customAgent
+      });
+
+      if (res.status === 401 || res.status === 403) {
+        console.warn(`[Web App Client] Received HTTP ${res.status} (Expired Session). Triggering dynamic session refresh...`);
+        await sessionStore.acquireFreshSession();
+        continue;
+      }
+
+      if (!res.ok) {
+        const errText = await res.text().catch(() => '');
+        const headersObj = {};
+        res.headers.forEach((val, key) => { headersObj[key] = val; });
+        console.error(`[API HTTP Error] URL: ${url}\nStatus: ${res.status} ${res.statusText}\nHeaders: ${JSON.stringify(headersObj)}\nResponse Text: ${errText}`);
+        throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
+      }
+      return res;
+    } catch (err) {
+      lastError = err;
+      const causeStr = err.cause ? ` (Cause: ${err.cause.message || err.cause})` : '';
+      console.warn(`[API Connection Retry ${i + 1}/${retries}] Failed fetching ${url}: ${err.message}${causeStr}`);
+      
+      if (err.message.includes('fetch failed') || err.message.includes('Timeout') || err.message.includes('timeout')) {
+        try {
+          console.warn("[Web App Client] Network error. Triggering background session refresh...");
+          await sessionStore.acquireFreshSession();
+        } catch (refreshErr) {
+          console.error("[Web App Client] Background session refresh failed:", refreshErr.message);
+        }
+      }
+
+      if (i < retries - 1) {
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError;
+}
 
 function updateCookieTimestamps(baseCookieStr) {
   if (!baseCookieStr) return '';
@@ -20,9 +78,13 @@ function getBrand() {
 
 function getCookies() {
   const brand = getBrand();
-  let baseCookie = config.MINE_TEST_AUTH_COOKIE ? `${brand}-auth=${config.MINE_TEST_AUTH_COOKIE}` : '';
-  if (config.CF_BM) {
-    baseCookie = baseCookie ? `${baseCookie}; __cf_bm=${config.CF_BM}` : `__cf_bm=${config.CF_BM}`;
+  const session = sessionStore.readSession();
+  const authCookieVal = session.cookies['kimi-auth'] || config.MINE_TEST_AUTH_COOKIE;
+  const cfBmVal = session.cookies['__cf_bm'] || config.CF_BM;
+
+  let baseCookie = authCookieVal ? `${brand}-auth=${authCookieVal}` : '';
+  if (cfBmVal) {
+    baseCookie = baseCookie ? `${baseCookie}; __cf_bm=${cfBmVal}` : `__cf_bm=${cfBmVal}`;
   }
   const extraCookies = `theme=dark; _ga=GA1.1.370269376.1781103784; g_state={"i_l":0,"i_ll":1781103785746,"i_e":{"enable_itp_optimization":0},"i_et":1781103785729}; lang=en-US; _gcl_au=1.1.364708090.1781103785.394713607.1781757945.1781757944; Hm_lvt_358cae4815e85d48f7e8ab7f3680a74b=1781757249,1781885858,1781923647,1781938280; HMACCOUNT=A7A9747C0E06B989; _clck=1pf5a8b%5E2%5Eg72%5E0%5E2362; _ga_Z0ZTEN03PZ=GS2.1.s1781939206$o1$g1$t1781939265$j1$l0$h0; _clsk=ybhoz7%5E1781948346293%5E1%5E1%5Er.clarity.ms%2Fcollect; Hm_lpvt_358cae4815e85d48f7e8ab7f3680a74b=1781956169; _ga_YXD8W70SZP=GS2.1.s1781954688$o17$g1$t1781956170$j46$l0$h0`;
   const fullCookieStr = baseCookie ? `${baseCookie}; ${extraCookies}` : extraCookies;
@@ -33,6 +95,9 @@ function getHeaders(isConnect = false, chatId = null) {
   const referer = chatId
     ? `https://${config.MINE_TEST_DOMAIN}/chat/${chatId}?chat_enter_method=history`
     : `https://${config.MINE_TEST_DOMAIN}/?chat_enter_method=new_chat`;
+
+  const session = sessionStore.readSession();
+  const shieldDataVal = session.headers['x-msh-shield-data'] || config.X_MSH_SHIELD_DATA;
 
   const headers = {
     "accept": "*/*",
@@ -54,7 +119,7 @@ function getHeaders(isConnect = false, chatId = null) {
     "x-msh-session-id": config.X_MSH_SESSION_ID,
     "x-msh-version": "1.0.0",
     "x-traffic-id": config.X_TRAFFIC_ID,
-    "x-msh-shield-data": config.X_MSH_SHIELD_DATA,
+    "x-msh-shield-data": shieldDataVal,
     "cookie": getCookies(),
     "Referer": referer
   };
@@ -100,8 +165,29 @@ export async function* parseConnectStream(responseStream) {
           console.error('Error parsing JSON chunk:', e, text);
         }
       } else if (flag === 2) {
-        // End of stream metadata
-        console.log('Stream end metadata block received:', messageBytes.toString('utf8'));
+        const text = messageBytes.toString('utf8');
+        console.log('Stream end metadata block received:', text);
+        try {
+          const meta = JSON.parse(text);
+          if (meta && meta.error) {
+            let errorMsg = meta.error.message || '';
+            if (!errorMsg && meta.error.details && meta.error.details.length > 0) {
+              const detail = meta.error.details[0];
+              if (detail.debug && detail.debug.localizedMessage && detail.debug.localizedMessage.message) {
+                errorMsg = detail.debug.localizedMessage.message;
+              }
+            }
+            if (!errorMsg) {
+              errorMsg = meta.error.code || 'Unknown Kimi API Error';
+            }
+            throw new Error(`Kimi API Error: ${errorMsg}`);
+          }
+        } catch (e) {
+          if (e.message.startsWith('Kimi API Error:')) {
+            throw e;
+          }
+          console.error('Failed to parse metadata block:', e.message);
+        }
       }
     }
   }
@@ -110,24 +196,22 @@ export async function* parseConnectStream(responseStream) {
 export async function getCurrentUser() {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.account.v1.UserService/GetCurrentUser`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(false),
     body: '{}'
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }));
   return res.json();
 }
 
 export async function getAvailableModels() {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.config.v1.ConfigService/GetAvailableModels`;
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(false),
     body: '{}'
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }));
   return res.json();
 }
 
@@ -139,12 +223,11 @@ export async function listChats(pageSize = 20, pageToken = '', query = '') {
     page_token: pageToken,
     query: query
   });
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(false),
     body
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }));
   return res.json();
 }
 
@@ -152,12 +235,11 @@ export async function getChat(chatId) {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.chat.v1.ChatService/GetChat`;
   const body = JSON.stringify({ chat_id: chatId });
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(false),
     body
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }));
   return res.json();
 }
 
@@ -165,12 +247,11 @@ export async function listMessages(chatId, pageSize = 100) {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.chat.v1.ChatService/ListMessages`;
   const body = JSON.stringify({ chat_id: chatId, page_size: pageSize });
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
-    headers: getHeaders(false),
+    headers: getHeaders(false, chatId),
     body
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  }));
   return res.json();
 }
 
@@ -241,16 +322,11 @@ export async function sendChatMessage(message, chatId, parentId, model = 'SCENAR
   const jsonBody = JSON.stringify(payload);
   const framedBody = frameMessage(jsonBody);
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(true, chatId),
     body: framedBody
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
-  }
+  }));
 
   return res.body; // ReadableStream
 }
@@ -259,16 +335,11 @@ export async function deleteChat(chatId) {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.chat.v1.ChatService/DeleteChat`;
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(false, null),
     body: JSON.stringify({ chat_id: chatId })
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
-  }
+  }));
 
   return await res.json();
 }
@@ -277,7 +348,7 @@ export async function updateChatName(chatId, newName) {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.chat.v1.ChatService/UpdateChat`;
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(false, null),
     body: JSON.stringify({
@@ -286,12 +357,7 @@ export async function updateChatName(chatId, newName) {
         name: newName
       }
     })
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
-  }
+  }));
 
   return await res.json();
 }
@@ -300,19 +366,14 @@ export async function resolveFileUri(chatId, fileUri) {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.mcp.v1.OKCService/ResolveFileURI`;
 
-  const res = await fetch(url, {
+  const res = await fetchWithRetry(url, () => ({
     method: 'POST',
     headers: getHeaders(false, chatId),
     body: JSON.stringify({
       chat_id: chatId,
       file_uri: fileUri
     })
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
-  }
+  }));
 
   return await res.json(); // should return { url: "..." }
 }

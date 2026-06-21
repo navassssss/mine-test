@@ -198,6 +198,33 @@ app.get('/refresh', async (req, res) => {
   }
 });
 
+// Secure internal webhook to trigger Puppeteer token refresh on request
+app.post('/api/internal/refresh-session', async (req, res) => {
+  const authHeader = req.headers['authorization'];
+  if (!authHeader || authHeader !== `Bearer ${config.BEARER_TOKEN}`) {
+    return res.status(401).json({ success: false, error: 'Unauthorized internal call' });
+  }
+
+  try {
+    console.log('[Internal Webhook] Received token refresh trigger...');
+    const result = await refreshTokens();
+    if (result.success) {
+      res.json({
+        success: true,
+        CF_BM: result.CF_BM,
+        X_MSH_SHIELD_DATA: result.X_MSH_SHIELD_DATA
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.reason || result.error || 'Refresh returned unsuccessful status'
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // 3. Settings Form Route
 app.get('/settings', (req, res) => {
   res.send(render('settings', {
@@ -560,8 +587,8 @@ app.get('/chat/:id/file', async (req, res) => {
 const PORT = config.PORT;
 app.listen(PORT, () => {
   console.log(`=================================================`);
-  console.log(`Kindle-friendly kimi Web App started!`);
-  console.log(`Access the client interface locally at:`);
-  console.log(`http://localhost:${PORT}`);
+  console.log(`Kindle Client Interface started!`);
+  console.log(`- Kindle Client Interface: http://localhost:${PORT}`);
   console.log(`=================================================`);
 });
+

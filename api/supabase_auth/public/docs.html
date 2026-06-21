@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Documentation - Mine Kimi API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/docs" class="active">Documentation</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+        <a href="/login" class="btn-primary">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="docs-container">
+    <!-- Sidebar -->
+    <aside class="docs-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">Getting Started</div>
+        <div class="sidebar-links">
+          <a href="#authentication">Authentication</a>
+          <a href="#chat-endpoint">Chat Completions</a>
+          <a href="#models-list">Models List</a>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Configuration</div>
+        <div class="sidebar-links">
+          <a href="#formatting">Formatting System</a>
+          <a href="#errors">Error Handling</a>
+        </div>
+      </div>
+    </aside>
+
+    <div class="docs-main-wrapper">
+      <!-- Main Content -->
+      <main class="docs-content">
+        <h1>Developer API Reference</h1>
+        <p>Welcome to the Mine Kimi API reference documentation. Our gateway allows you to integrate Kimi's advanced intelligence directly into your external services, applications, and tools with state-of-the-art auto-healing rotators.</p>
+
+        <!-- Featured Sandbox Card Callout -->
+        <div class="premium-card" style="margin-top: 2rem; margin-bottom: 3rem; display: flex; flex-direction: column; gap: 1rem; border-color: rgba(99, 102, 241, 0.25);">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="font-size: 1.5rem;">🚀</span>
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff;">Interactive API Sandbox</h3>
+          </div>
+          <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.6;">
+            Test requests in real-time, inspect server response streaming headers, copy auto-generated Fetch/cURL commands, and play with different model parameter endpoints in our dedicated API playground.
+          </p>
+          <div>
+            <a href="/sandbox" class="btn-primary" style="font-size: 0.85rem; padding: 0.55rem 1.25rem;">Launch Playground &rarr;</a>
+          </div>
+        </div>
+
+        <section id="authentication">
+          <h2>Authentication</h2>
+          <p>To authenticate requests, obtain your API Key from the Developer Console and pass it in either of the following formats:</p>
+          <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="premium-card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
+                <span style="color: var(--accent-primary);">x-api-key</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">Header Parameter</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Pass your developer token as a request header: <code>x-api-key: your-api-key</code>.</p>
+            </div>
+            <div class="premium-card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
+                <span style="color: var(--accent-primary);">Authorization</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">Header Parameter</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Pass your developer token as a standard Bearer authorization header: <code>Authorization: Bearer your-api-key</code>.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="chat-endpoint">
+          <h2>Chat Completions</h2>
+          <p>Send chat prompts and query parameters to the chat completion gateway. Supports SSE streaming and standard responses.</p>
+          <p><strong>Endpoint:</strong> <code>POST /api/chat</code></p>
+          
+          <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="premium-card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
+                <span>message</span>
+                <span style="color: var(--text-red); font-size: 0.85rem;">string (required)</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">The prompt message string to send to the Kimi intelligence engine.</p>
+            </div>
+            <div class="premium-card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
+                <span>model</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">string</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Model key to route requests: <code>k2d6</code>, <code>k2d6-thinking</code>, <code>k2d6-agent</code>, <code>k2d6-agent-ultra</code>.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="formatting">
+          <h2>YAML Formatting System</h2>
+          <p>You can customize structural outputs by adding these keys to your request body. The gateway wraps them into Kimi-readable YAML frontmatter automatically:</p>
+          <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="premium-card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
+                <span>instructions</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">string</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">System instructions to force specific persona behaviors or restrict formatting patterns on the model.</p>
+            </div>
+            <div class="premium-card" style="padding: 1.5rem;">
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
+                <span>max_words</span>
+                <span style="color: var(--text-muted); font-size: 0.85rem;">number</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Strict maximum boundary limit of tokens or words returned in response.</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-container">
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>API Gateway Online</span>
+      </div>
+      <div class="footer-links">
+        <a href="/docs">Docs</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Supabase & Auth Navbar integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/navbar.js"></script>
+</body>
+</html>

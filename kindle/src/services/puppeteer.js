@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import { config } from '../config.js';
+import { sessionStore } from '../../sessionStore.js';
 
 export async function refreshTokens() {
   console.log('Starting Puppeteer token refresh...');
@@ -61,7 +62,7 @@ export async function refreshTokens() {
     console.log(`Navigating to https://${domain}/chat`);
     await page.goto(`https://${domain}/chat`, {
       waitUntil: 'networkidle2',
-      timeout: 30000
+      timeout: 120000
     });
 
     // Trigger a dummy fetch request in page context to force shield data generation
@@ -93,18 +94,18 @@ export async function refreshTokens() {
     if (freshCfBm) console.log('Found __cf_bm cookie:', freshCfBm.substring(0, 20) + '...');
     if (interceptedShieldData) console.log('Found x-msh-shield-data:', interceptedShieldData);
 
-    const updates = {};
+    const sessionUpdates = { cookies: {}, headers: {} };
     if (freshCfBm) {
-      updates.CF_BM = freshCfBm;
+      sessionUpdates.cookies['__cf_bm'] = freshCfBm;
     }
     if (interceptedShieldData) {
-      updates.X_MSH_SHIELD_DATA = interceptedShieldData;
+      sessionUpdates.headers['x-msh-shield-data'] = interceptedShieldData;
     }
 
-    if (Object.keys(updates).length > 0) {
-      config.update(updates);
-      console.log('Updated configuration and written changes to .env successfully!');
-      return { success: true, ...updates };
+    if (freshCfBm || interceptedShieldData) {
+      sessionStore.writeSession(sessionUpdates);
+      console.log('Updated session.json store successfully!');
+      return { success: true, CF_BM: freshCfBm, X_MSH_SHIELD_DATA: interceptedShieldData };
     } else {
       console.log('No token updates found.');
       return { success: false, reason: 'No new values intercepted' };
@@ -119,3 +120,5 @@ export async function refreshTokens() {
     }
   }
 }
+
+sessionStore.registerRefreshHandler(refreshTokens);

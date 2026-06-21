@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive API Sandbox - Mine Kimi API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .sandbox-page-container {
+      max-width: 1200px;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
+    }
+    .sandbox-page-header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+    .sandbox-page-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+    .sandbox-page-header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+    .sandbox-workspace {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+    .sandbox-terminal-section {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    .sandbox-terminal {
+      background-color: #020617;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 1.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: #94a3b8;
+      height: 380px;
+      min-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
+    }
+    @media (max-width: 900px) {
+      .sandbox-workspace {
+        grid-template-columns: 1fr;
+      }
+      .sandbox-terminal {
+        height: 250px;
+        min-height: 250px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/docs">Documentation</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+        <a href="/login" class="btn-primary">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="sandbox-page-container">
+    <div class="sandbox-page-header">
+      <h1>Interactive <span class="gradient-text">API Sandbox</span></h1>
+      <p>Configure parameters, preview generated snippets, and stream requests in real-time.</p>
+    </div>
+
+    <div class="sandbox-workspace">
+      <!-- Left: Form Controls and Code Snippet -->
+      <div class="premium-card" style="padding: 2.5rem;">
+        <div class="form-group">
+          <label for="sb-api-key">API Key</label>
+          <input type="text" id="sb-api-key" placeholder="Enter your x-api-key..." value="">
+        </div>
+
+        <div class="form-group">
+          <label for="sb-model">Model</label>
+          <select id="sb-model">
+            <option value="k2d6">K2.6 Instant (k2d6)</option>
+            <option value="k2d6-thinking">K2.6 Thinking (k2d6-thinking)</option>
+            <option value="k2d6-agent">K2.6 Agent (k2d6-agent)</option>
+            <option value="k2d6-agent-ultra">K2.Swarm (k2d6-agent-ultra)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sb-message">Message Prompt</label>
+          <textarea id="sb-message" rows="3" placeholder="Say hello to Kimi...">Hello, Kimi! Summarize your capabilities in one line.</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="sb-instructions">Custom System Instructions (Optional)</label>
+          <input type="text" id="sb-instructions" placeholder="e.g. Keep answers technical">
+        </div>
+
+        <!-- Request snippet tabs -->
+        <div style="margin-top: 1.5rem;">
+          <div class="tab-container">
+            <button class="tab-btn active" id="tab-fetch" onclick="switchTab('fetch')">Fetch (JS)</button>
+            <button class="tab-btn" id="tab-curl" onclick="switchTab('curl')">cURL</button>
+          </div>
+          <div class="code-block-header">
+            <span id="code-snippet-title">Fetch Code Snippet</span>
+            <button class="btn-copy" onclick="copyCode()">Copy</button>
+          </div>
+          <pre id="curl-display" style="border-top: none; font-size: 0.8rem; height: 180px; max-height: 180px;">loading...</pre>
+        </div>
+      </div>
+
+      <!-- Right: Run Button and Console -->
+      <div class="sandbox-terminal-section">
+        <button class="btn-submit" onclick="sendRequest()" style="padding: 1.1rem; font-size: 1.1rem; margin-top: 0; margin-bottom: 1.5rem;">
+          <span>🚀</span> Send API Request
+        </button>
+
+        <div class="premium-card" style="padding: 2rem; flex: 1;">
+          <div class="terminal-title" style="margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; font-weight: 700; color: #fff;">Response Console</div>
+          <div class="sandbox-terminal" id="terminal-display">Response stream output will display here in real-time...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>API Gateway Online</span>
+      </div>
+      <div class="footer-links">
+        <a href="/docs">Docs</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Supabase & Auth Navbar integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    const apiKeyInput = document.getElementById('sb-api-key');
+    const modelSelect = document.getElementById('sb-model');
+    const messageInput = document.getElementById('sb-message');
+    const instructionsInput = document.getElementById('sb-instructions');
+    const curlDisplay = document.getElementById('curl-display');
+    const terminal = document.getElementById('terminal-display');
+    
+    let activeTab = 'fetch'; // fetch as default
+
+    function switchTab(tab) {
+      activeTab = tab;
+      document.getElementById('tab-fetch').classList.toggle('active', tab === 'fetch');
+      document.getElementById('tab-curl').classList.toggle('active', tab === 'curl');
+      document.getElementById('code-snippet-title').textContent = tab === 'fetch' ? 'Fetch Code Snippet' : 'cURL Command';
+      updateCodeSnippet();
+    }
+
+    function updateCodeSnippet() {
+      const apiKeyVal = apiKeyInput.value || 'YOUR_API_KEY';
+      const modelVal = modelSelect.value;
+      const messageVal = messageInput.value;
+      const instVal = instructionsInput.value;
+
+      let payload = {
+        message: messageVal,
+        model: modelVal,
+        stream: true
+      };
+      if (instVal) {
+        payload.instructions = instVal;
+      }
+
+      if (activeTab === 'fetch') {
+        const fetchCode = `fetch("${window.location.origin}/api/chat", {\n` +
+          `  method: "POST",\n` +
+          `  headers: {\n` +
+          `    "Content-Type": "application/json",\n` +
+          `    "x-api-key": "${apiKeyVal}"\n` +
+          `  },\n` +
+          `  body: JSON.stringify(${JSON.stringify(payload, null, 2).replace(/\n/g, '\n  ')})\n` +
+          `});`;
+        curlDisplay.textContent = fetchCode;
+      } else {
+        const curlCmd = `curl -X POST ${window.location.origin}/api/chat \\\n` +
+          `  -H "x-api-key: ${apiKeyVal}" \\\n` +
+          `  -H "Content-Type: application/json" \\\n` +
+          `  -d '${JSON.stringify(payload, null, 2)}'`;
+        curlDisplay.textContent = curlCmd;
+      }
+    }
+
+    [apiKeyInput, modelSelect, messageInput, instructionsInput].forEach(el => {
+      el.addEventListener('input', updateCodeSnippet);
+    });
+
+    function copyCode() {
+      navigator.clipboard.writeText(curlDisplay.textContent);
+      const btn = document.querySelector('.code-block-header .btn-copy');
+      const original = btn.innerText;
+      btn.innerText = 'Copied!';
+      setTimeout(() => btn.innerText = original, 2000);
+    }
+
+    // Auto-populate sandbox key if logged in
+    window.addEventListener('load', async () => {
+      try {
+        const client = await getSupabaseClient();
+        const { data: { session } } = await client.auth.getSession();
+        if (session) {
+          const { data: profile } = await client
+            .from('profiles')
+            .select('api_key')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          if (profile && profile.api_key) {
+            apiKeyInput.value = profile.api_key;
+            updateCodeSnippet();
+          }
+        }
+      } catch (err) {
+        console.log('No active developer key found for sandbox populate.');
+      }
+    });
+
+    async function sendRequest() {
+      const apiKeyVal = apiKeyInput.value.trim();
+      if (!apiKeyVal) {
+        alert('Please enter a valid API Key in the sandbox input to run the request.');
+        return;
+      }
+
+      terminal.textContent = '> Establishing stream connection...\n';
+      
+      const modelVal = modelSelect.value;
+      const messageVal = messageInput.value;
+      const instVal = instructionsInput.value;
+
+      let payload = {
+        message: messageVal,
+        model: modelVal,
+        stream: true
+      };
+      if (instVal) {
+        payload.instructions = instVal;
+      }
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKeyVal
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP ${response.status} ${response.statusText}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        terminal.textContent += '> Stream opened. Receiving chunks...\n\n';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            terminal.textContent += '\n\n> [Stream Finished]';
+            break;
+          }
+          const chunk = decoder.decode(value, { stream: true });
+          terminal.textContent += chunk;
+          terminal.scrollTop = terminal.scrollHeight; // Autoscroll
+        }
+
+      } catch (err) {
+        terminal.textContent += `\n❌ Error: ${err.message}`;
+      }
+    }
+
+    // Init
+    switchTab('fetch');
+  </script>
+</body>
+</html>

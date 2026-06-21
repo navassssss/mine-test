@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Dashboard - Mine Kimi API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/docs">Documentation</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+        <a href="/login" class="btn-primary">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="dashboard-title-area">
+      <h1 id="welcome-message">Hello Developer</h1>
+      <p>Securely manage your API credentials and track real-time gateway metrics.</p>
+    </div>
+
+    <div id="alert-box" class="alert"></div>
+
+    <div id="loading-state" style="text-align: center; padding: 4rem 0;">
+      <div class="spinner"></div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 1rem;">Syncing developer profile...</p>
+    </div>
+
+    <div id="dashboard-content" style="display: none;">
+      <div class="dashboard-grid">
+        <!-- Left: Key & Code -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          <!-- Key Widget -->
+          <div class="premium-card">
+            <h2>🔑 API Credentials</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+              Provide this unique Bearer credential in the <code>x-api-key</code> request header to authenticate with the Kimi gateway.
+            </p>
+            <div class="key-display-wrapper">
+              <span class="key-value-text" id="api-key-value">mine_pub_••••••••••••••••••••</span>
+              <div class="key-actions">
+                <!-- Eye Toggle icon -->
+                <button class="action-icon-btn" onclick="toggleKeyVisibility()" title="Show/Hide Key">
+                  <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <!-- Eye outline SVG -->
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+                <!-- Copy icon -->
+                <button class="action-icon-btn" onclick="copyApiKey()" title="Copy Key">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Snippet Widget -->
+          <div class="premium-card">
+            <h2>💻 Quick Start Integration</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+              Integrate the endpoint directly using a fetch request inside your application:
+            </p>
+            <div class="code-block-header">
+              <span>JavaScript Fetch</span>
+              <button class="btn-copy" onclick="copySnippet()">Copy Snippet</button>
+            </div>
+            <pre id="curl-code-snippet" style="margin-bottom: 0;">loading...</pre>
+          </div>
+        </div>
+
+        <!-- Right: Usage Stats -->
+        <div style="display: flex; flex-direction: column;">
+          <div class="premium-card" style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <h2>📊 Usage Status</h2>
+              <p style="font-size: 0.9rem; color: var(--text-muted);">
+                Your remaining token query quotas. Quota refreshes monthly.
+              </p>
+            </div>
+            <div class="quota-radial-box">
+              <span class="quota-huge-number" id="quota-text">30</span>
+              <span class="quota-sub">Requests Remaining</span>
+              <div class="quota-progress-bar-thick">
+                <div class="quota-progress-fill" id="quota-bar-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-top: 1rem;">
+              Need higher rate limits? Contact portal admin.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>API Gateway Online</span>
+      </div>
+      <div class="footer-links">
+        <a href="/docs">Docs</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    let rawApiKey = '';
+    let isKeyHidden = true;
+
+    window.addEventListener('load', async () => {
+      // 1. Enforce Auth Guard Middleware
+      const session = await checkAuth(true);
+      if (!session) return;
+      
+      // 2. Fetch and sync profile database details
+      await syncDashboardData(session.user);
+    });
+
+    async function syncDashboardData(user) {
+      const loading = document.getElementById('loading-state');
+      const content = document.getElementById('dashboard-content');
+      const alertBox = document.getElementById('alert-box');
+
+      try {
+        const client = await getSupabaseClient();
+
+        // Query profile table
+        let { data: profile, error } = await client
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        // If profile doesn't exist, create it from metadata
+        if (!profile) {
+          console.log('Initializing profile for first login...');
+          const meta = user.user_metadata || {};
+          
+          const { data: newProfile, error: insertError } = await client
+            .from('profiles')
+            .insert({
+              id: user.id,
+              full_name: meta.full_name || 'Developer',
+              dob: meta.dob || null,
+              gender: meta.gender || 'Other',
+              mobile_number: meta.mobile_number || ''
+            })
+            .select()
+            .single();
+
+          if (insertError) throw insertError;
+          profile = newProfile;
+        }
+
+        // Set UI details
+        document.getElementById('welcome-message').innerText = `Hello, ${profile.full_name}`;
+        
+        rawApiKey = profile.api_key;
+        renderApiKey();
+
+        // Update quota progress bar and counts
+        const remaining = profile.requests_remaining;
+        const total = 30;
+        document.getElementById('quota-text').innerText = `${remaining} / ${total}`;
+        
+        const pct = Math.max(0, Math.min(100, (remaining / total) * 100));
+        document.getElementById('quota-bar-fill').style.width = `${pct}%`;
+
+        // Update fetch example with actual key
+        const hostUrl = window.location.origin || 'http://localhost:3001';
+        const snippetText = `fetch("${hostUrl}/api/chat", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "x-api-key": "${profile.api_key}"\n  },\n  body: JSON.stringify({\n    "message": "Hello!",\n    "model": "k2d6",\n    "stream": true\n  })\n});`;
+        document.getElementById('curl-code-snippet').innerText = snippetText;
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+      } catch (err) {
+        console.error('Dashboard sync error:', err);
+        alertBox.innerText = 'Sync Error: ' + err.message;
+        alertBox.className = 'alert alert-error';
+        alertBox.style.display = 'block';
+        loading.style.display = 'none';
+      }
+    }
+
+    function renderApiKey() {
+      const apiKeyEl = document.getElementById('api-key-value');
+      const eyeIcon = document.getElementById('eye-icon');
+      if (isKeyHidden) {
+        apiKeyEl.innerText = rawApiKey.substring(0, 9) + '•'.repeat(24);
+        // Show normal eye path
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        `;
+      } else {
+        apiKeyEl.innerText = rawApiKey;
+        // Show slashed eye path
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+        `;
+      }
+    }
+
+    function toggleKeyVisibility() {
+      isKeyHidden = !isKeyHidden;
+      renderApiKey();
+    }
+
+    function copyApiKey() {
+      navigator.clipboard.writeText(rawApiKey).then(() => {
+        alert('API Key copied to clipboard!');
+      });
+    }
+
+    function copySnippet() {
+      const code = document.getElementById('curl-code-snippet').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.code-block-header .btn-copy');
+        const original = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => btn.innerText = original, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

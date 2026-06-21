@@ -1,9 +1,79 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 import express from 'express';
 import bodyParser from 'body-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from './config.js';
 import * as api from './api.js';
+import * as db from './supabaseDb.js';
+import { refreshTokens } from './services/puppeteer.js'; // Registers local refresh handler
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// --- Developer Authentication Portal & Dashboard Routes ---
+const authPublicDir = path.resolve(__dirname, 'supabase_auth/public');
+
+// Serve static assets for developer auth
+app.use(express.static(authPublicDir));
+
+// Safe Config Endpoint (never exposes service role keys)
+app.get('/config', (req, res) => {
+  res.json({
+    supabaseUrl: config.SUPABASE_URL,
+    supabaseAnonKey: config.SUPABASE_ANON_KEY
+  });
+});
+
+// Auth Page Routing Mapping
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'login.html'));
+});
+
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'register.html'));
+});
+
+app.get('/forgot-password', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'forgot-password.html'));
+});
+
+app.get('/reset-password', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'reset-password.html'));
+});
+
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'dashboard.html'));
+});
+
+app.get('/profile', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'profile.html'));
+});
+
+app.get('/auth/callback', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'callback.html'));
+});
+
+// Root path on the API server redirects to /login for developers
+app.get('/', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'index.html'));
+});
+
+app.get('/about', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'about.html'));
+});
+
+app.get('/models', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'models.html'));
+});
+
+// --- Developer API Gateway Routes ---
+const apiPublicDir = __dirname;
 
 // In-memory stateful cache for parent_id to achieve zero-latency lookup overhead
 let cachedParentId = null;
@@ -25,15 +95,6 @@ async function initializeParentIdCache() {
   }
 }
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Simple logger middleware
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
-
 // GET /api/models - Returns list of supported model keys
 app.get('/api/models', (req, res) => {
   res.json({
@@ -46,7 +107,44 @@ app.get('/api/models', (req, res) => {
   });
 });
 
+// GET /docs, /help, /api/help - Serves the interactive documentation & request builder UI
+app.get(['/docs', '/help', '/api/help'], (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'docs.html'));
+});
+
+// GET /sandbox - Serves the dedicated interactive API sandbox builder page
+app.get('/sandbox', (req, res) => {
+  res.sendFile(path.join(authPublicDir, 'sandbox.html'));
+});
+
+// POST /api/register - Redirects registration to the secure official portal
+app.post('/api/register', (req, res) => {
+  res.status(400).json({
+    error: 'Direct API registration is deprecated. Please register via the secure developer portal at /register to get your API key.'
+  });
+});
+
 app.post('/api/chat', async (req, res) => {
+  // Extract and validate API Key
+  let apiKey = req.headers['x-api-key'] || req.query.key;
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    apiKey = authHeader.substring(7);
+  }
+
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Authentication required. Provide a valid API key in the "x-api-key" or "Authorization" header.' });
+  }
+
+  const quotaCheck = await db.consumeRequest(apiKey);
+  if (!quotaCheck.valid) {
+    return res.status(401).json({ error: 'Invalid API key.' });
+  }
+
+  if (quotaCheck.quotaExhausted) {
+    return res.status(403).json({ error: 'API key request quota exhausted. You have 0 requests remaining.' });
+  }
+
   const {
     message,
     instructions,
@@ -75,7 +173,16 @@ app.post('/api/chat', async (req, res) => {
 
   // Build YAML frontmatter block for formatting and styling instructions
   const frontmatter = {};
-  if (instructions && typeof instructions === 'string' && instructions.trim()) frontmatter.instructions = instructions.trim();
+
+  // Enforce #exact-pattern for all queries to prevent conversational filler
+  let instructionsStr = '';
+  if (instructions && typeof instructions === 'string' && instructions.trim()) {
+    instructionsStr = `${instructions.trim()} #exact-pattern`;
+  } else {
+    instructionsStr = '#exact-pattern';
+  }
+  frontmatter.instructions = instructionsStr;
+
   if (format && typeof format === 'string' && format.trim()) frontmatter.format = format.trim();
   if (tone && typeof tone === 'string' && tone.trim()) frontmatter.tone = tone.trim();
   if (audience && typeof audience === 'string' && audience.trim()) frontmatter.audience = audience.trim();
@@ -151,7 +258,7 @@ app.post('/api/chat', async (req, res) => {
           fullResponseText += delta;
 
           if (isSSE) {
-            res.write(`data: ${JSON.stringify({ delta, chat_id: serverChatId, parent_id: lastMsgId })}\n\n`);
+            res.write(`data: ${JSON.stringify({ delta })}\n\n`);
           } else {
             res.write(delta);
           }
@@ -192,9 +299,7 @@ app.post('/api/chat', async (req, res) => {
       }
 
       res.json({
-        response: fullResponseText,
-        chat_id: serverChatId,
-        parent_id: lastMsgId
+        response: fullResponseText
       });
 
       if (lastMsgId) {
@@ -208,7 +313,7 @@ app.post('/api/chat', async (req, res) => {
     const isAuthError = error.message.includes('403') || error.message.includes('401');
     const status = isAuthError ? 401 : 500;
     const msg = isAuthError 
-      ? 'Authentication keys expired. Please refresh tokens by running the Puppeteer automation script.'
+      ? 'Authentication keys expired. Please refresh tokens.'
       : `Internal API Error: ${error.message}`;
 
     if (res.headersSent) {
@@ -224,15 +329,16 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Start the high speed api server
+// Start the server
 const PORT = config.PORT;
 app.listen(PORT, () => {
   console.log(`=================================================`);
-  console.log(`High-Speed Public API Server started!`);
-  console.log(`Local Access: http://localhost:${PORT}`);
-  console.log(`POST /api/chat accepts JSON body.`);
+  console.log(`Mine Kimi API Server started!`);
+  console.log(`- Developer Auth Portal  : http://localhost:${PORT}/login`);
+  console.log(`- Developer API Gateway  : http://localhost:${PORT}/api/chat`);
+  console.log(`- Interactive API Help   : http://localhost:${PORT}/help`);
   console.log(`=================================================`);
-  
+
   // Kick off the asynchronous history pre-fetch
   initializeParentIdCache();
 });

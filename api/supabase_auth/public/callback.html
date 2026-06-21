@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authenticating - Supabase Auth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <div class="auth-container" style="text-align: center;">
+    <div class="auth-header">
+      <h1>Completing Authentication</h1>
+      <p>Please wait while we finalize your secure session...</p>
+    </div>
+    <div class="spinner"></div>
+  </div>
+
+  <script src="/js/supabase-client.js"></script>
+  <script>
+    window.addEventListener('load', async () => {
+      try {
+        const client = await getSupabaseClient();
+        
+        // Parse parameters from query string
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const next = params.get('next') || '/dashboard';
+        const type = params.get('type'); // 'recovery', 'signup', etc.
+
+        if (code) {
+          // Exchange code for active session in PKCE flow
+          const { data, error } = await client.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+        }
+
+        // Check if there is an active session
+        const { data: { session } } = await client.auth.getSession();
+
+        if (session) {
+          // If the auth flow is for password recovery
+          if (type === 'recovery' || window.location.hash.includes('type=recovery')) {
+            window.location.href = '/reset-password';
+          } else {
+            window.location.href = '/dashboard';
+          }
+        } else {
+          // Fallback to login if no session is set
+          window.location.href = '/login?error=no_session';
+        }
+      } catch (err) {
+        console.error('Callback error:', err);
+        window.location.href = `/login?error=${encodeURIComponent(err.message)}`;
+      }
+    });
+  </script>
+</body>
+</html>

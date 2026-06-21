@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer Profile - Mine Kimi API</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="glow-container">
+    <div class="glow-circle glow-1"></div>
+    <div class="glow-circle glow-2"></div>
+  </div>
+
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/docs">Documentation</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+        <a href="/login" class="btn-primary">Login</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="dashboard-title-area">
+      <h1>Profile Settings</h1>
+      <p>Modify and secure your developer profile details.</p>
+    </div>
+
+    <div id="alert-box" class="alert"></div>
+
+    <div id="loading-state" style="text-align: center; padding: 4rem 0;">
+      <div class="spinner"></div>
+      <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 1rem;">Retrieving account details...</p>
+    </div>
+
+    <div id="profile-content" style="display: none; max-width: 680px; margin: 0 auto;">
+      <div class="premium-card">
+        <h2>👤 Developer Profile Details</h2>
+        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem;">
+          Update your public profile configuration. Information is stored securely in Supabase user tables.
+        </p>
+
+        <!-- Update Profile Form -->
+        <form id="profile-form" onsubmit="handleUpdateProfile(event)">
+          <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" required>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="dob">Date of Birth</label>
+              <input type="date" id="dob">
+            </div>
+
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select id="gender">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="mobileNumber">Mobile Number</label>
+            <input type="text" id="mobileNumber" required>
+          </div>
+
+          <button type="submit" class="btn-submit" id="btn-update">Save Profile Changes</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>API Gateway Online</span>
+      </div>
+      <div class="footer-links">
+        <a href="/docs">Docs</a>
+        <a href="/models">Models</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/supabase-client.js"></script>
+  <script src="/js/auth-guard.js"></script>
+  <script src="/js/navbar.js"></script>
+  <script>
+    let activeSession = null;
+
+    window.addEventListener('load', async () => {
+      // 1. Enforce Auth Guard Middleware
+      const session = await checkAuth(true);
+      if (!session) return;
+      
+      activeSession = session;
+      
+      // 2. Fetch profile from database
+      await fetchProfile(session.user);
+    });
+
+    async function fetchProfile(user) {
+      const loading = document.getElementById('loading-state');
+      const content = document.getElementById('profile-content');
+      const alertBox = document.getElementById('alert-box');
+
+      try {
+        const client = await getSupabaseClient();
+        
+        let { data: profile, error } = await client
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        // If for some reason profile is not initialized
+        if (!profile) {
+          window.location.href = '/dashboard';
+          return;
+        }
+
+        // Fill update form
+        document.getElementById('fullName').value = profile.full_name;
+        document.getElementById('dob').value = profile.dob || '';
+        document.getElementById('gender').value = profile.gender || 'Other';
+        document.getElementById('mobileNumber').value = profile.mobile_number || '';
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+      } catch (err) {
+        console.error('Profile fetch error:', err);
+        alertBox.innerText = 'Error loading settings: ' + err.message;
+        alertBox.className = 'alert alert-error';
+        alertBox.style.display = 'block';
+        loading.style.display = 'none';
+      }
+    }
+
+    async function handleUpdateProfile(e) {
+      e.preventDefault();
+      const alertBox = document.getElementById('alert-box');
+      const updateBtn = document.getElementById('btn-update');
+
+      alertBox.style.display = 'none';
+      updateBtn.disabled = true;
+      updateBtn.innerHTML = '<span>Saving Changes...</span>';
+
+      const fullName = document.getElementById('fullName').value;
+      const dob = document.getElementById('dob').value;
+      const gender = document.getElementById('gender').value;
+      const mobileNumber = document.getElementById('mobileNumber').value;
+
+      try {
+        const client = await getSupabaseClient();
+        
+        // Update profile
+        const { error } = await client
+          .from('profiles')
+          .update({
+            full_name: fullName,
+            dob: dob || null,
+            gender: gender,
+            mobile_number: mobileNumber
+          })
+          .eq('id', activeSession.user.id);
+
+        if (error) throw error;
+
+        alertBox.innerText = 'Profile details updated successfully!';
+        alertBox.className = 'alert alert-success';
+        alertBox.style.display = 'block';
+      } catch (err) {
+        console.error(err);
+        alertBox.innerText = err.message || 'Failed to update profile settings.';
+        alertBox.className = 'alert alert-error';
+        alertBox.style.display = 'block';
+      } finally {
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = 'Save Profile Changes';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -248,7 +248,7 @@ app.post('/chat/new', async (req, res) => {
   const { message, model } = req.body;
   try {
     console.log('Starting a brand new chat session...');
-    const stream = await api.sendChatMessage(message, null, null, 'SCENARIO_K2D5');
+    const stream = await api.sendChatMessage(message, null, null, model);
 
     // We must consume the stream fully to write the message on the backend before redirecting
     let fullResponse = '';
@@ -339,6 +339,7 @@ app.get('/chat/:id', async (req, res) => {
       const chatMeta = await api.getChat(chatId);
       if (chatMeta && chatMeta.chat) {
         pageData.chatName = chatMeta.chat.name || 'Conversation';
+        pageData.chatModel = chatMeta.chat.scenario || 'SCENARIO_K2D5';
       }
     } catch (e) {
       console.log('Could not fetch chat metadata, falling back to default name:', e.message);
@@ -406,11 +407,11 @@ app.get('/chat/:id', async (req, res) => {
 // 7. Send Message to Chat Route (Supports standard POST and AJAX Streaming)
 app.post('/chat/:id/send', async (req, res) => {
   const chatId = req.params.id;
-  const { message, parentId } = req.body;
+  const { message, parentId, model } = req.body;
   const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest';
 
   try {
-    const stream = await api.sendChatMessage(message, chatId, parentId, 'SCENARIO_K2D5');
+    const stream = await api.sendChatMessage(message, chatId, parentId, model);
 
     if (isAjax) {
       // Stream chunks back directly to client

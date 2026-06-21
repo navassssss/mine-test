@@ -1,4 +1,4 @@
-import { config } from '../config.js';
+import { config } from './config.js';
 
 function updateCookieTimestamps(baseCookieStr) {
   if (!baseCookieStr) return '';
@@ -34,7 +34,7 @@ function getHeaders(isConnect = false, chatId = null) {
     ? `https://${config.MINE_TEST_DOMAIN}/chat/${chatId}?chat_enter_method=history`
     : `https://${config.MINE_TEST_DOMAIN}/?chat_enter_method=new_chat`;
 
-  const headers = {
+  return {
     "accept": "*/*",
     "accept-language": "en-US,en;q=0.9",
     "authorization": `Bearer ${config.BEARER_TOKEN}`,
@@ -58,25 +58,26 @@ function getHeaders(isConnect = false, chatId = null) {
     "cookie": getCookies(),
     "Referer": referer
   };
-  return headers;
 }
 
-function frameMessage(jsonString) {
+function frameMessage(jsonBody) {
   const encoder = new TextEncoder();
-  const bodyBytes = encoder.encode(jsonString);
+  const bodyBytes = encoder.encode(jsonBody);
   const length = bodyBytes.length;
 
-  const header = new Uint8Array(5);
-  header[0] = 0; // flag
-  header[1] = (length >> 24) & 0xff;
-  header[2] = (length >> 16) & 0xff;
-  header[3] = (length >> 8) & 0xff;
-  header[4] = length & 0xff;
+  const buffer = new ArrayBuffer(5 + length);
+  const view = new DataView(buffer);
 
-  const framed = new Uint8Array(5 + length);
-  framed.set(header, 0);
-  framed.set(bodyBytes, 5);
-  return framed;
+  // Connect protocol framing: 1 byte flag (0 for payload, 2 for end-of-stream)
+  view.setUint8(0, 0);
+  // 4 bytes length
+  view.setUint32(1, length);
+
+  const uint8View = new Uint8Array(buffer);
+  uint8View.set(bodyBytes, 5);
+
+  // Return standard string for Node.js fetch body
+  return Buffer.from(buffer);
 }
 
 export async function* parseConnectStream(responseStream) {
@@ -87,7 +88,7 @@ export async function* parseConnectStream(responseStream) {
       const flag = buffer[0];
       const length = (buffer[1] << 24) | (buffer[2] << 16) | (buffer[3] << 8) | buffer[4];
       if (buffer.length < 5 + length) {
-        break; // wait for more data
+        break; // Wait for more data
       }
       const messageBytes = buffer.subarray(5, 5 + length);
       buffer = buffer.subarray(5 + length);
@@ -100,78 +101,10 @@ export async function* parseConnectStream(responseStream) {
           console.error('Error parsing JSON chunk:', e, text);
         }
       } else if (flag === 2) {
-        // End of stream metadata
         console.log('Stream end metadata block received:', messageBytes.toString('utf8'));
       }
     }
   }
-}
-
-export async function getCurrentUser() {
-  const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.account.v1.UserService/GetCurrentUser`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: getHeaders(false),
-    body: '{}'
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  return res.json();
-}
-
-export async function getAvailableModels() {
-  const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.config.v1.ConfigService/GetAvailableModels`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: getHeaders(false),
-    body: '{}'
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  return res.json();
-}
-
-export async function listChats(pageSize = 20, pageToken = '', query = '') {
-  const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.chat.v1.ChatService/ListChats`;
-  const body = JSON.stringify({
-    page_size: pageSize,
-    page_token: pageToken,
-    query: query
-  });
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: getHeaders(false),
-    body
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  return res.json();
-}
-
-export async function getChat(chatId) {
-  const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.chat.v1.ChatService/GetChat`;
-  const body = JSON.stringify({ chat_id: chatId });
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: getHeaders(false),
-    body
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  return res.json();
-}
-
-export async function listMessages(chatId, pageSize = 100) {
-  const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.chat.v1.ChatService/ListMessages`;
-  const body = JSON.stringify({ chat_id: chatId, page_size: pageSize });
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: getHeaders(false),
-    body
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-  return res.json();
 }
 
 function mapModelToPayload(model, message, chatId, parentId) {
@@ -255,14 +188,55 @@ export async function sendChatMessage(message, chatId, parentId, model = 'SCENAR
   return res.body; // ReadableStream
 }
 
-export async function deleteChat(chatId) {
+export async function createChatWithSystemInstructions(instructions, model = 'SCENARIO_K2D5') {
   const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.chat.v1.ChatService/DeleteChat`;
+  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.chat.v1.ChatService/Chat`;
+
+  let scenario = "SCENARIO_K2D5";
+  const m = String(model || '').toLowerCase();
+  if (m === "k2d6-thinking" || m === "scenario_k2d5_thinking") {
+    scenario = "SCENARIO_K2D5";
+  } else if (m === "k2d6-agent" || m === "scenario_ok_computer_normal") {
+    scenario = "SCENARIO_OK_COMPUTER";
+  } else if (m === "k2d6-agent-ultra" || m === "scenario_ok_computer_ultra") {
+    scenario = "SCENARIO_OK_COMPUTER";
+  } else if (model && model.startsWith("SCENARIO_")) {
+    scenario = model;
+  }
+
+  const payload = {
+    scenario: scenario,
+    tools: [{ type: "TOOL_TYPE_SEARCH", search: {} }],
+    message: {
+      role: "system",
+      blocks: [{ message_id: "", text: { content: instructions } }],
+      scenario: scenario
+    },
+    options: {
+      thinking: m.includes("thinking"),
+      enable_plugin: false
+    }
+  };
+
+  if (m === "k2d6-agent") {
+    payload.agent_mode = "TYPE_NORMAL";
+    payload.agentMode = "TYPE_NORMAL";
+    payload.options.agent_mode = "TYPE_NORMAL";
+    payload["kimiPlusId"] = "ok-computer";
+  } else if (m === "k2d6-agent-ultra") {
+    payload.agent_mode = "TYPE_ULTRA";
+    payload.agentMode = "TYPE_ULTRA";
+    payload.options.agent_mode = "TYPE_ULTRA";
+    payload["kimiPlusId"] = "ok-computer";
+  }
+
+  const jsonBody = JSON.stringify(payload);
+  const framedBody = frameMessage(jsonBody);
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: getHeaders(false, null),
-    body: JSON.stringify({ chat_id: chatId })
+    headers: getHeaders(true, null),
+    body: framedBody
   });
 
   if (!res.ok) {
@@ -270,49 +244,35 @@ export async function deleteChat(chatId) {
     throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
   }
 
-  return await res.json();
-}
+  let chatId = null;
+  let messageId = null;
+  for await (const chunk of parseConnectStream(res.body)) {
+    if (chunk.chatId) chatId = chunk.chatId;
+    else if (chunk.chat_id) chatId = chunk.chat_id;
+    else if (chunk.chat && chunk.chat.id) chatId = chunk.chat.id;
+    else if (chunk.message && chunk.message.chatId) chatId = chunk.message.chatId;
+    else if (chunk.message && chunk.message.chat_id) chatId = chunk.message.chat_id;
 
-export async function updateChatName(chatId, newName) {
-  const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.chat.v1.ChatService/UpdateChat`;
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: getHeaders(false, null),
-    body: JSON.stringify({
-      chat: {
-        id: chatId,
-        name: newName
-      }
-    })
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
+    if (chunk.message && chunk.message.id) {
+      messageId = chunk.message.id;
+    }
   }
 
-  return await res.json();
+  if (!chatId) {
+    throw new Error('Failed to parse chat ID from system message stream.');
+  }
+
+  return { chatId, messageId };
 }
 
-export async function resolveFileUri(chatId, fileUri) {
+export async function listMessages(chatId, pageSize = 100) {
   const brand = getBrand();
-  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.mcp.v1.OKCService/ResolveFileURI`;
-
+  const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.chat.v1.ChatService/ListMessages`;
   const res = await fetch(url, {
     method: 'POST',
     headers: getHeaders(false, chatId),
-    body: JSON.stringify({
-      chat_id: chatId,
-      file_uri: fileUri
-    })
+    body: JSON.stringify({ chat_id: chatId, page_size: pageSize })
   });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errText || res.statusText}`);
-  }
-
-  return await res.json(); // should return { url: "..." }
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  return res.json();
 }

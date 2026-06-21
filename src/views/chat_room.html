@@ -22,6 +22,7 @@
   <h3>Send Message</h3>
   <form id="message-form" action="/chat/{{chatId}}/send" method="POST">
     <input type="hidden" name="parentId" value="{{lastMessageId}}">
+    <input type="hidden" name="model" value="{{chatModel}}">
     <textarea name="message" id="message-input" rows="4" required placeholder="Type your message here..."></textarea>
     <button type="submit" class="btn btn-refresh">Send Message</button>
   </form>

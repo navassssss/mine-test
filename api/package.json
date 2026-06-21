@@ -10,8 +10,11 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.43.4",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.6",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "express-rate-limit": "^8.5.2",
+    "helmet": "^8.2.0",
     "puppeteer": "^22.6.5",
     "undici": "^6.27.0"
   },

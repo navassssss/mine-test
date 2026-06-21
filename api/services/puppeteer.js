@@ -6,7 +6,7 @@ export async function refreshTokens() {
   console.log('Starting Puppeteer token refresh...');
   let browser;
   try {
-    browser = await puppeteer.launch({
+    const launchOptions = {
       headless: true,
       args: [
         '--no-sandbox',
@@ -14,7 +14,14 @@ export async function refreshTokens() {
         '--disable-web-security',
         '--disable-features=IsolateOrigins,site-per-process'
       ]
-    });
+    };
+
+    // Use specific chrome executable if configured (e.g. for Render native environments)
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
 

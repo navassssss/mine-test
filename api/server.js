@@ -1,6 +1,13 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+// In production on Render, we shouldn't globally disable TLS checking unless strictly necessary
+if (process.env.NODE_ENV !== 'production') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 import express from 'express';
 import bodyParser from 'body-parser';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { config } from './config.js';
@@ -12,6 +19,30 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Security Middlewares
+app.use(helmet({
+  contentSecurityPolicy: false // Allow inline scripts/styles for the portal UI
+}));
+
+// CORS Configuration
+app.use(cors({
+  origin: '*', // For a public API, allow all origins. For production, you might restrict this if needed.
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key', 'Accept']
+}));
+
+// Rate Limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  message: { error: 'Too many requests from this IP, please try again after 15 minutes' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiter to API endpoints
+app.use('/api/', apiLimiter);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -312,9 +343,14 @@ app.post('/api/chat', async (req, res) => {
     console.error('API Chat Error:', error);
     const isAuthError = error.message.includes('403') || error.message.includes('401');
     const status = isAuthError ? 401 : 500;
-    const msg = isAuthError 
+    let msg = isAuthError 
       ? 'Authentication keys expired. Please refresh tokens.'
       : `Internal API Error: ${error.message}`;
+
+    // Hide internal error details in production
+    if (!isAuthError && process.env.NODE_ENV === 'production') {
+       msg = 'An internal server error occurred while processing your request.';
+    }
 
     if (res.headersSent) {
       if (req.headers['accept'] && req.headers['accept'].includes('text/event-stream')) {

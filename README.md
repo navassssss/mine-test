@@ -78,6 +78,25 @@ The portal will be live at:
 
 ---
 
+## ☁️ Deployment (Render)
+
+This project is fully containerized and production-ready for seamless deployment on [Render](https://render.com/).
+
+### One-Click Deploy (Render.yaml)
+A `render.yaml` infrastructure-as-code file is included in the root directory. To deploy:
+1. Push this repository to GitHub/GitLab.
+2. In your Render Dashboard, select **Blueprints** -> **New Blueprint Instance**.
+3. Connect the repository. Render will automatically detect the `render.yaml` and configure the Web Service with Docker to ensure Puppeteer runs flawlessly in a headless Chrome environment.
+
+### Environment Setup on Render
+After deployment, make sure to add your secrets to the Render Environment dashboard:
+*   `SUPABASE_URL`
+*   `SUPABASE_ANON_KEY`
+*   `SUPABASE_SERVICE_ROLE_KEY`
+*   `LIVE_API_CHAT_ID`
+
+---
+
 ## 💡 Developer Guidelines
 
 ### Unified Header

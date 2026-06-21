@@ -48,7 +48,7 @@ export const config = {
   },
   get PORT() {
     this.reload();
-    return parseInt(process.env.LIVE_API_PORT || '3001', 10);
+    return parseInt(process.env.PORT || process.env.LIVE_API_PORT || '3001', 10);
   },
   get LIVE_API_CHAT_ID() {
     this.reload();

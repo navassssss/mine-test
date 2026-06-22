@@ -91,7 +91,10 @@
           body: new URLSearchParams(formData).toString()
         });
 
-        if (!response.ok) throw new Error('Failed to send');
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(errText || 'Failed to send message');
+        }
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -111,7 +114,8 @@
 
       } catch (err) {
         console.error('Streaming error:', err);
-        window.location.reload();
+        streamingContent.innerHTML += `<br><br><span style="color: red; font-weight: bold;">❌ Server Error: ${err.message.replace('Error: ', '')}</span>`;
+        // Do not reload so the user can read the error
       }
     });
   }

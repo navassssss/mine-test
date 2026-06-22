@@ -3,9 +3,349 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Developer Documentation - Mine Kimi API</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="AICore" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <title>Developer Documentation — AICore API</title>
+  <meta name="description" content="Official documentation for the AICore API. Learn how to integrate real-time AI models, authenticate with API keys, and utilize Server-Sent Events (SSE) for streaming responses.">
+  <meta name="keywords" content="AICore API documentation, AI API integration, SSE streaming, API keys, AI models API, developer guide">
+  <meta property="og:title" content="Developer Documentation — AICore API">
+  <meta property="og:description" content="Official documentation for the AICore API. Learn how to integrate real-time AI models, authenticate, and utilize SSE for streaming responses.">
+  <meta property="og:type" content="article">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <style>
+    /* Documentation Page Enhancements */
+    .docs-container {
+      max-width: 1400px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 3rem;
+    }
+    
+    @media (max-width: 1024px) {
+      /* Hide sidebar entirely — content fills full width on mobile/tablet */
+      .docs-sidebar {
+        display: none;
+      }
+      .docs-container {
+        grid-template-columns: 1fr;
+        gap: 0;
+        padding: 0 1.25rem;
+      }
+      .docs-main-wrapper {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .docs-container {
+        margin: 1.5rem auto;
+        padding: 0 1rem;
+      }
+      .docs-content h1 {
+        font-size: 2rem;
+      }
+      .docs-content h2 {
+        font-size: 1.4rem;
+      }
+      .code-tabs-wrapper {
+        margin: 1.25rem 0;
+      }
+      .code-tabs-header {
+        flex-wrap: wrap;
+        padding: 0 0.75rem;
+      }
+      .code-tabs-buttons {
+        flex-wrap: wrap;
+      }
+      .code-tabs-content pre {
+        max-height: 300px;
+        font-size: 0.78rem;
+      }
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+      .feature-card {
+        padding: 1.25rem;
+      }
+    }
+    
+    .docs-sidebar {
+      position: sticky;
+      top: 100px;
+      height: calc(100vh - 140px);
+      overflow-y: auto;
+      padding-right: 1rem;
+    }
+    
+    /* Scrollbar for sidebar */
+    .docs-sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .docs-sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .docs-sidebar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+    }
+    
+    .sidebar-section {
+      margin-bottom: 2.5rem;
+    }
+    
+    .sidebar-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-secondary);
+      margin-bottom: 1rem;
+      font-weight: 800;
+    }
+    
+    .sidebar-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    
+    .sidebar-links a {
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 550;
+      transition: all 0.2s ease;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      border-left: 2px solid transparent;
+    }
+    
+    .sidebar-links a:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.03);
+      border-left-color: var(--accent-primary);
+      padding-left: 0.95rem;
+    }
+    
+    .sidebar-links a.active {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.08);
+      border-left-color: var(--accent-primary);
+      padding-left: 0.95rem;
+    }
+    
+    .docs-main-wrapper {
+      max-width: 960px;
+    }
+    
+    .docs-content section {
+      margin-bottom: 4rem;
+      scroll-margin-top: 100px;
+    }
+    
+    .docs-content h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    
+    .docs-content h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      margin-top: 3rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .docs-content h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      color: #fff;
+    }
+    
+    .docs-content p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      line-height: 1.75;
+      margin-bottom: 1.25rem;
+    }
+    
+    .parameter-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.95rem;
+    }
+    
+    .parameter-table th, .parameter-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .parameter-table th {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.01);
+    }
+    
+    .parameter-table td {
+      color: var(--text-muted);
+    }
+    
+    .param-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+    
+    .param-type {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-secondary);
+      background: rgba(168, 85, 247, 0.05);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      border: 1px solid rgba(168, 85, 247, 0.1);
+    }
+    
+    .param-req {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-red);
+    }
+    
+    .param-opt {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    
+    /* Code tabs */
+    .code-tabs-wrapper {
+      margin: 2rem 0;
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .code-tabs-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(8, 11, 17, 0.9);
+      padding: 0 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .code-tabs-buttons {
+      display: flex;
+    }
+    
+    .code-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .code-tab-btn:hover {
+      color: #fff;
+    }
+    
+    .code-tab-btn.active {
+      color: var(--accent-primary);
+      border-bottom-color: var(--accent-primary);
+    }
+    
+    .code-tabs-content pre {
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      background: #020617;
+      max-height: 480px;
+    }
+    
+    .highlight-pill {
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 99px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      color: var(--accent-primary);
+    }
+    
+    /* Feature grids */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .feature-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.25s ease;
+    }
+    
+    .feature-card:hover {
+      border-color: rgba(99, 102, 241, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .feature-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .feature-card-title {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+  </style>
 </head>
 <body>
   <div class="glow-container">
@@ -15,7 +355,7 @@
 
   <header>
     <div class="nav-container">
-      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <a href="/" class="logo">🚀 <strong>AICore</strong> <span style="font-weight: 300; opacity: 0.85;">API</span></a>
       <nav>
         <a href="/">Home</a>
         <a href="/docs" class="active">Documentation</a>
@@ -32,16 +372,33 @@
       <div class="sidebar-section">
         <div class="sidebar-title">Getting Started</div>
         <div class="sidebar-links">
+          <a href="#introduction" class="active">Introduction</a>
           <a href="#authentication">Authentication</a>
-          <a href="#chat-endpoint">Chat Completions</a>
-          <a href="#models-list">Models List</a>
+          <a href="#quickstart">Quickstart</a>
         </div>
       </div>
       <div class="sidebar-section">
-        <div class="sidebar-title">Configuration</div>
+        <div class="sidebar-title">Core Gateway API</div>
         <div class="sidebar-links">
-          <a href="#formatting">Formatting System</a>
-          <a href="#errors">Error Handling</a>
+          <a href="#chat-endpoint">Chat Completions</a>
+          <a href="#models-list">Supported Models</a>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Parameter Explorer</div>
+        <div class="sidebar-links">
+          <a href="#parameter-summary">Overview</a>
+          <a href="#persona-system">Persona & Tone</a>
+          <a href="#formatting-options">Formatting & Layout</a>
+          <a href="#length-control">Length Control</a>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">Integration Guides</div>
+        <div class="sidebar-links">
+          <a href="#real-examples">Code Library</a>
+          <a href="#streaming-guide">SSE Streaming</a>
+          <a href="#error-handling">Error Codes</a>
         </div>
       </div>
     </aside>
@@ -49,85 +406,500 @@
     <div class="docs-main-wrapper">
       <!-- Main Content -->
       <main class="docs-content">
-        <h1>Developer API Reference</h1>
-        <p>Welcome to the Mine Kimi API reference documentation. Our gateway allows you to integrate Kimi's advanced intelligence directly into your external services, applications, and tools with state-of-the-art auto-healing rotators.</p>
-
-        <!-- Featured Sandbox Card Callout -->
-        <div class="premium-card" style="margin-top: 2rem; margin-bottom: 3rem; display: flex; flex-direction: column; gap: 1rem; border-color: rgba(99, 102, 241, 0.25);">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <span style="font-size: 1.5rem;">🚀</span>
-            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff;">Interactive API Sandbox</h3>
-          </div>
-          <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.6;">
-            Test requests in real-time, inspect server response streaming headers, copy auto-generated Fetch/cURL commands, and play with different model parameter endpoints in our dedicated API playground.
-          </p>
-          <div>
+        <section id="introduction">
+          <h1>Developer API Reference</h1>
+          <p>Welcome to the AICore API reference documentation. Our gateway provides high-throughput, structured access to advanced AI models. It features a self-healing orchestrator that handles session rotations seamlessly, letting you focus on building features.</p>
+          
+          <div class="premium-card" style="margin-top: 2rem; border-color: rgba(99, 102, 241, 0.25);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <span style="font-size: 1.5rem;">🚀</span>
+              <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff;">Interactive Playground Sandbox</h3>
+            </div>
+            <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.6;">
+              Test prompts in real-time, tweak formatting rules, auto-generate Fetch/cURL commands, and stream direct token outputs inside our interactive Sandbox interface.
+            </p>
             <a href="/sandbox" class="btn-primary" style="font-size: 0.85rem; padding: 0.55rem 1.25rem;">Launch Playground &rarr;</a>
-          </div>
-        </div>
-
-        <section id="authentication">
-          <h2>Authentication</h2>
-          <p>To authenticate requests, obtain your API Key from the Developer Console and pass it in either of the following formats:</p>
-          <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
-            <div class="premium-card" style="padding: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
-                <span style="color: var(--accent-primary);">x-api-key</span>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">Header Parameter</span>
-              </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Pass your developer token as a request header: <code>x-api-key: your-api-key</code>.</p>
-            </div>
-            <div class="premium-card" style="padding: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
-                <span style="color: var(--accent-primary);">Authorization</span>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">Header Parameter</span>
-              </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Pass your developer token as a standard Bearer authorization header: <code>Authorization: Bearer your-api-key</code>.</p>
-            </div>
           </div>
         </section>
 
-        <section id="chat-endpoint">
-          <h2>Chat Completions</h2>
-          <p>Send chat prompts and query parameters to the chat completion gateway. Supports SSE streaming and standard responses.</p>
-          <p><strong>Endpoint:</strong> <code>POST /api/chat</code></p>
+        <section id="authentication">
+          <h2>🔑 Authentication</h2>
+          <p>The AICore API gateway requires authentication for all API endpoints. You must provide a valid API Key obtained from your Developer Console. Keys can be supplied using either of the following standard headers:</p>
           
           <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
             <div class="premium-card" style="padding: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
-                <span>message</span>
-                <span style="color: var(--text-red); font-size: 0.85rem;">string (required)</span>
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem; align-items: center;">
+                <span style="color: var(--accent-primary); font-family: 'JetBrains Mono', monospace; font-size: 1.05rem;">x-api-key</span>
+                <span class="highlight-pill">Custom Header</span>
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">The prompt message string to send to the Kimi intelligence engine.</p>
+              <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0;">Pass your token as a header parameter:<br><code>x-api-key: mk_live_5893a7d2e...</code></p>
             </div>
+            
             <div class="premium-card" style="padding: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
-                <span>model</span>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">string</span>
+              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem; align-items: center;">
+                <span style="color: var(--accent-primary); font-family: 'JetBrains Mono', monospace; font-size: 1.05rem;">Authorization</span>
+                <span class="highlight-pill">Bearer Token</span>
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Model key to route requests: <code>k2d6</code>, <code>k2d6-thinking</code>, <code>k2d6-agent</code>, <code>k2d6-agent-ultra</code>.</p>
+              <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 0;">Pass your token using the standard authorization format:<br><code>Authorization: Bearer mk_live_5893a7d2e...</code></p>
             </div>
           </div>
         </section>
 
-        <section id="formatting">
-          <h2>YAML Formatting System</h2>
-          <p>You can customize structural outputs by adding these keys to your request body. The gateway wraps them into Kimi-readable YAML frontmatter automatically:</p>
-          <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
-            <div class="premium-card" style="padding: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
-                <span>instructions</span>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">string</span>
+        <section id="quickstart">
+          <h2>⚡ Quickstart</h2>
+          <p>Run a simple cURL command to verify your access. Make sure to replace <code>YOUR_API_KEY</code> with the actual key from your dashboard console:</p>
+          
+          <div class="code-block-header">
+            <span>Verify API Connection (cURL)</span>
+            <button class="btn-copy" onclick="copySnippet('quickstart-curl')">Copy</button>
+          </div>
+          <pre id="quickstart-curl" style="color: #38bdf8;">curl -X POST http://localhost:3001/api/chat \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Verify connection. Reply with \"API online\".",
+    "model": "k2d6",
+    "stream": false
+  }'</pre>
+        </section>
+
+        <section id="chat-endpoint">
+          <h2>💬 Chat Completions</h2>
+          <p>Route prompts and configure output formatting through our stateless or stateful chat completion gateway.</p>
+          <p><strong>Endpoint:</strong> <code style="font-family: 'JetBrains Mono', monospace; color: var(--text-green);">POST /api/chat</code></p>
+          
+          <h3>Request Body Parameters</h3>
+          <p>The API handles automated YAML frontmatter injection. Pass any of the parameters below in the JSON request body to shape the model output:</p>
+          
+          <div class="premium-table-container">
+            <table class="premium-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%">Parameter</th>
+                  <th style="width: 15%">Type</th>
+                  <th style="width: 15%">Status</th>
+                  <th style="width: 45%">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="param-name">message</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-req">Required</span></td>
+                  <td>The main text prompt or instruction sent to the model.</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">model</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Model key to use. Defaults to <code>k2d6</code>.</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">stream</span></td>
+                  <td><span class="param-type">boolean</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Enable Server-Sent Events (SSE) streaming. Defaults to <code>true</code>.</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">instructions</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Base prompt guidelines. Automatically suffix-locked with <code>#exact-pattern</code>.</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">role</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Specifies the persona or profession the model should adopt.</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">tone</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Tone of response (e.g. <code>technical</code>, <code>enthusiastic</code>, <code>academic</code>).</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">audience</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Intended reader (e.g. <code>beginners</code>, <code>CTOs</code>, <code>executive board</code>).</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">format</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Desired format (e.g. <code>markdown</code>, <code>json</code>, <code>raw</code>).</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">structure</span></td>
+                  <td><span class="param-type">string</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Layout configuration (e.g. <code>introduction-body-conclusion</code>).</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">max_words</span></td>
+                  <td><span class="param-type">number</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Hard boundary count for response length.</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">no_emojis</span></td>
+                  <td><span class="param-type">boolean</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Instructs the model to completely omit emojis from the response.</td>
+                </tr>
+                <tr>
+                  <td><span class="param-name">bullets_only</span></td>
+                  <td><span class="param-type">boolean</span></td>
+                  <td><span class="param-opt">Optional</span></td>
+                  <td>Instructs the model to respond strictly with a list of bullet points.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="models-list">
+          <h2>🤖 Supported Models</h2>
+          <p>The gateway interfaces directly with Kimi's advanced foundation layers. Route your tasks to the most suitable engine key:</p>
+          
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-card-header">
+                <span class="feature-card-title">K2.6 Instant</span>
+                <span class="highlight-pill" style="color: var(--text-green); background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">k2d6</span>
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">System instructions to force specific persona behaviors or restrict formatting patterns on the model.</p>
+              <p style="font-size: 0.9rem; margin-bottom: 0;">Optimized for speed and general completion tasks. Low latency turnaround, ideal for conversational agents.</p>
             </div>
-            <div class="premium-card" style="padding: 1.5rem;">
-              <div style="display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 0.5rem;">
-                <span>max_words</span>
-                <span style="color: var(--text-muted); font-size: 0.85rem;">number</span>
+            
+            <div class="feature-card">
+              <div class="feature-card-header">
+                <span class="feature-card-title">K2.6 Thinking</span>
+                <span class="highlight-pill">k2d6-thinking</span>
               </div>
-              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">Strict maximum boundary limit of tokens or words returned in response.</p>
+              <p style="font-size: 0.9rem; margin-bottom: 0;">Equipped with deep logic chains. Solves complex reasoning, mathematical equations, and advanced code debugging.</p>
             </div>
+            
+            <div class="feature-card">
+              <div class="feature-card-header">
+                <span class="feature-card-title">K2.6 Agent</span>
+                <span class="highlight-pill" style="color: var(--accent-secondary); background: rgba(168, 85, 247, 0.1); border-color: rgba(168, 85, 247, 0.2);">k2d6-agent</span>
+              </div>
+              <p style="font-size: 0.9rem; margin-bottom: 0;">Integrates web research, slide generation, and document parsing capabilities natively.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="parameter-summary">
+          <h2>🛠️ Parameter Explorer & Frontmatter Engine</h2>
+          <p>Our gateway automatically builds and injects YAML frontmatter directives into Kimi based on your API request. Below is a deep dive into the features you can leverage to shape output completions without complex system prompting.</p>
+        </section>
+
+        <section id="persona-system">
+          <h3>🎭 Persona & Tone Customization</h3>
+          <p>Control the model's behavior and writing style dynamically using the <code>role</code>, <code>tone</code>, and <code>audience</code> parameters.</p>
+          
+          <div class="premium-card">
+            <h4 style="color: #fff; margin-bottom: 0.5rem; font-family: 'Outfit', sans-serif;">Interactive Example Configuration</h4>
+            <div class="code-block-header">
+              <span>Persona API Payload</span>
+              <button class="btn-copy" onclick="copySnippet('persona-payload')">Copy</button>
+            </div>
+            <pre id="persona-payload" style="color: #c084fc;">{
+  "message": "Explain how database transactions work.",
+  "role": "Database Reliability Engineer",
+  "tone": "highly technical, debugging-focused",
+  "audience": "Junior developers learning Postgres"
+}</pre>
+          </div>
+        </section>
+
+        <section id="formatting-options">
+          <h3>📄 Formatting & Layout Control</h3>
+          <p>Specify structural configurations to enforce a clean payload outline. Use <code>format</code>, <code>structure</code>, <code>no_emojis</code>, and <code>bullets_only</code> to structure the response.</p>
+          
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-card-header">
+                <span class="feature-card-title">Strict JSON Response</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Force the model to return valid JSON output without any conversational wrappers.</p>
+              <pre style="font-size: 0.75rem; padding: 0.5rem; overflow: hidden; background: #020617; border-color: transparent;">{
+  "format": "JSON structure",
+  "structure": "only raw json, no markdown wrappers"
+}</pre>
+            </div>
+            
+            <div class="feature-card">
+              <div class="feature-card-header">
+                <span class="feature-card-title">Markdown Outlines</span>
+              </div>
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">Receive beautifully organized bulleted docs clean of formatting or emoji noise.</p>
+              <pre style="font-size: 0.75rem; padding: 0.5rem; overflow: hidden; background: #020617; border-color: transparent;">{
+  "bullets_only": true,
+  "no_emojis": true
+}</pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="length-control">
+          <h3>📏 Output Length Boundaries</h3>
+          <p>Control rate-limit thresholds or keep dashboard widgets concise by applying a strict length filter. Use <code>max_words</code> to request exact truncation lengths from Kimi.</p>
+          
+          <div class="premium-card">
+            <h4 style="color: #fff; margin-bottom: 0.5rem; font-family: 'Outfit', sans-serif;">Short-Form Summary Payload</h4>
+            <div class="code-block-header">
+              <span>Word Boundary Payload</span>
+              <button class="btn-copy" onclick="copySnippet('len-payload')">Copy</button>
+            </div>
+            <pre id="len-payload" style="color: #34d399;">{
+  "message": "Provide a high-level summary of the quantum entanglement theory.",
+  "max_words": 50,
+  "bullets_only": true
+}</pre>
+          </div>
+        </section>
+
+        <section id="real-examples">
+          <h2>📚 Code Library Examples</h2>
+          <p>Use these complete, production-ready code integrations in various languages to start chatting with the Kimi Gateway API.</p>
+
+          <div class="code-tabs-wrapper">
+            <div class="code-tabs-header">
+              <div class="code-tabs-buttons">
+                <button class="code-tab-btn active" onclick="switchLanguageTab('js')">Node.js</button>
+                <button class="code-tab-btn" onclick="switchLanguageTab('python')">Python</button>
+                <button class="code-tab-btn" onclick="switchLanguageTab('go')">Go</button>
+                <button class="code-tab-btn" onclick="switchLanguageTab('php')">PHP</button>
+              </div>
+              <button class="btn-copy" onclick="copyLanguageSnippet()">Copy Code</button>
+            </div>
+            <div class="code-tabs-content">
+              <!-- Node.js Example -->
+              <pre id="code-js" style="color: #38bdf8; display: block;">const fetch = require('node-fetch');
+
+async function askKimi() {
+  const response = await fetch('http://localhost:3001/api/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': 'YOUR_API_KEY'
+    },
+    body: JSON.stringify({
+      message: 'Write a quicksort implementation in JavaScript.',
+      model: 'k2d6',
+      role: 'Staff Software Engineer',
+      tone: 'technical',
+      format: 'markdown',
+      no_emojis: true,
+      stream: false
+    })
+  });
+
+  const data = await response.json();
+  console.log(data.response);
+}
+
+askKimi();</pre>
+
+              <!-- Python Example -->
+              <pre id="code-python" style="color: #34d399; display: none;">import requests
+
+def ask_kimi():
+    url = "http://localhost:3001/api/chat"
+    headers = {
+        "x-api-key": "YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "message": "Explain quantum computing in one paragraph.",
+        "model": "k2d6",
+        "role": "Quantum Physicist",
+        "tone": "educational",
+        "max_words": 100,
+        "stream": False
+    }
+    
+    response = requests.post(url, json=payload, headers=headers)
+    if response.status_code == 200:
+        print(response.json().get("response"))
+    else:
+        print(f"Error {response.status_code}: {response.text}")
+
+ask_kimi()</pre>
+
+              <!-- Go Example -->
+              <pre id="code-go" style="color: #f472b6; display: none;">package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	url := "http://localhost:3001/api/chat"
+	payload := map[string]interface{}{
+		"message":   "Give me a bullet point summary of Rust vs C++",
+		"model":     "k2d6",
+		"tone":      "objective",
+		"bullets_only": true,
+		"stream":    false,
+	}
+
+	jsonPayload, _ := json.Marshal(payload)
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+	req.Header.Set("x-api-key", "YOUR_API_KEY")
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("HTTP Request failed: %s\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
+}</pre>
+
+              <!-- PHP Example -->
+              <pre id="code-php" style="color: #fb923c; display: none;">&lt;?php
+
+$url = 'http://localhost:3001/api/chat';
+$apiKey = 'YOUR_API_KEY';
+
+$payload = [
+    'message' => 'Summarize the benefits of Clean Architecture.',
+    'model' => 'k2d6',
+    'role' => 'Software Architect',
+    'tone' => 'authoritative',
+    'stream' => false
+];
+
+$ch = curl_init($url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'Content-Type: application/json',
+    'x-api-key: ' . $apiKey
+]);
+
+$response = curl_exec($ch);
+if (curl_errno($ch)) {
+    echo 'Curl error: ' . curl_error($ch);
+} else {
+    $data = json_decode($response, true);
+    echo $data['response'] ?? $response;
+}
+curl_close($ch);</pre>
+            </div>
+          </div>
+        </section>
+
+        <section id="streaming-guide">
+          <h2>🌊 SSE Streaming Integration</h2>
+          <p>By enabling <code>"stream": true</code>, the gateway responds using standard Server-Sent Events (SSE). This is ideal for chat UIs, delivering real-time responses with sub-second initial token latency.</p>
+          
+          <p>When using SSE streaming, the API returns the <code>text/event-stream</code> content type. Each chunk is prefixed with <code>data:</code>, and a final <code>data: [DONE]</code> message is emitted when the generation is complete.</p>
+
+          <div class="premium-card">
+            <h4 style="color: #fff; margin-bottom: 0.5rem; font-family: 'Outfit', sans-serif;">JavaScript Stream Consumer Example</h4>
+            <div class="code-block-header">
+              <span>Frontend SSE Reader Script</span>
+              <button class="btn-copy" onclick="copySnippet('sse-js-code')">Copy</button>
+            </div>
+            <pre id="sse-js-code" style="color: #38bdf8;">async function streamKimi() {
+  const response = await fetch('http://localhost:3001/api/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'text/event-stream',
+      'x-api-key': 'YOUR_API_KEY'
+    },
+    body: JSON.stringify({
+      message: 'Write an essay about space exploration.',
+      stream: true
+    })
+  });
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop(); // save incomplete line
+
+    for (const line of lines) {
+      const cleanLine = line.trim();
+      if (!cleanLine.startsWith('data:')) continue;
+
+      const dataStr = cleanLine.substring(5).trim();
+      if (dataStr === '[DONE]') {
+        console.log('\n--- Stream Complete ---');
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(dataStr);
+        if (parsed.delta) {
+          process.stdout.write(parsed.delta); // Print token real-time
+        }
+      } catch (err) {
+        // Skip formatting lines
+      }
+    }
+  }
+}</pre>
+          </div>
+        </section>
+
+        <section id="error-handling">
+          <h2>⚠️ Response Status & Error Codes</h2>
+          <p>The gateway maps Kimi response patterns to standard HTTP status codes. Refer to the error catalog below for handling failures gracefully:</p>
+
+          <div class="premium-table-container">
+            <table class="premium-table">
+              <thead>
+                <tr>
+                  <th style="width: 15%">HTTP Code</th>
+                  <th style="width: 25%">Error String</th>
+                  <th style="width: 60%">Resolution</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span style="color: var(--text-red); font-weight: 700;">401</span></td>
+                  <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">Authentication required</td>
+                  <td>The request header lacked a valid <code>x-api-key</code> or <code>Authorization</code> bearer token.</td>
+                </tr>
+                <tr>
+                  <td><span style="color: var(--text-red); font-weight: 700;">403</span></td>
+                  <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">Quota exhausted</td>
+                  <td>Your developer key has consumed its full allocated request volume. Please upgrade or contact support.</td>
+                </tr>
+                <tr>
+                  <td><span style="color: var(--text-red); font-weight: 700;">400</span></td>
+                  <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">Missing or invalid message</td>
+                  <td>The JSON payload didn't contain a valid <code>"message"</code> parameter in the request body.</td>
+                </tr>
+                <tr>
+                  <td><span style="color: var(--text-red); font-weight: 700;">500</span></td>
+                  <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">Internal API Error</td>
+                  <td>An issue occurred with the upstream Kimi model engine or Puppeteer session rotator. The gateway auto-recovers sessions dynamically in the background.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
       </main>
@@ -136,7 +908,7 @@
 
   <footer>
     <div class="footer-container">
-      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 AICore API. All rights reserved.</span>
       <div class="status-badge">
         <div class="status-dot"></div>
         <span>API Gateway Online</span>
@@ -153,5 +925,81 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/supabase-client.js"></script>
   <script src="/js/navbar.js"></script>
+  
+  <script>
+    // Copy code snippet helper
+    function copySnippet(elementId) {
+      const code = document.getElementById(elementId).innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector(`[onclick="copySnippet('${elementId}')"]`);
+        const originalText = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => {
+          btn.innerText = originalText;
+        }, 2000);
+      });
+    }
+
+    // Language switcher logic
+    let currentLanguage = 'js';
+    
+    function switchLanguageTab(lang) {
+      currentLanguage = lang;
+      
+      // Update active buttons
+      const buttons = document.querySelectorAll('.code-tab-btn');
+      buttons.forEach(btn => {
+        if (btn.getAttribute('onclick').includes(lang)) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      
+      // Hide all displays
+      const codeElements = ['js', 'python', 'go', 'php'];
+      codeElements.forEach(el => {
+        document.getElementById(`code-${el}`).style.display = 'none';
+      });
+      
+      // Show active display
+      document.getElementById(`code-${lang}`).style.display = 'block';
+    }
+    
+    function copyLanguageSnippet() {
+      const codeElement = document.getElementById(`code-${currentLanguage}`);
+      navigator.clipboard.writeText(codeElement.innerText).then(() => {
+        const btn = document.querySelector('.code-tabs-header .btn-copy');
+        const originalText = btn.innerText;
+        btn.innerText = 'Copied!';
+        setTimeout(() => {
+          btn.innerText = originalText;
+        }, 2000);
+      });
+    }
+
+    // Dynamic sidebar link highlighting on scroll
+    window.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          const id = entry.target.getAttribute('id');
+          if (entry.intersectionRatio > 0) {
+            document.querySelectorAll('.sidebar-links a').forEach(link => {
+              link.classList.remove('active');
+            });
+            const activeLink = document.querySelector(`.sidebar-links a[href="#${id}"]`);
+            if (activeLink) activeLink.classList.add('active');
+          }
+        });
+      }, {
+        rootMargin: '-10% 0px -80% 0px'
+      });
+
+      // Track all sections
+      document.querySelectorAll('.docs-content section').forEach(section => {
+        observer.observe(section);
+      });
+    });
+  </script>
 </body>
 </html>

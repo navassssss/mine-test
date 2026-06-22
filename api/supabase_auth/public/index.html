@@ -3,86 +3,382 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mine Kimi API - Developer Portal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="AICore" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <title>Free AI API | AICore API — Next-Gen LLM Developer Gateway</title>
+  <meta name="description" content="Get instant access to a powerful Free AI API. AICore API provides developers with production-grade, free access to advanced LLMs with real-time streaming and secure key management.">
+  <meta name="keywords" content="free AI API, free API, free LLM API, open source AI API, developer free APIs, ChatGPT alternative API, AICore API, AI Gateway">
+  <meta property="og:title" content="Free AI API | AICore API — Next-Gen Developer Gateway">
+  <meta property="og:description" content="Get instant access to a powerful Free AI API. Production-grade access to advanced language models with real-time streaming.">
+  <meta property="og:type" content="website">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <style>
-    /* Page specific Hero Styles */
+    /* ── Hero ── */
     .hero {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
-      padding: 7rem 2rem 5rem;
+      padding: 7rem 1.5rem 4rem;
       text-align: center;
       position: relative;
     }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-primary);
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      padding: 0.35rem 0.9rem;
+      border-radius: 99px;
+      margin-bottom: 2rem;
+    }
+
     .hero h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 3.8rem;
+      font-size: 4rem;
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.15;
       margin-bottom: 1.5rem;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
+
     .gradient-text {
       background: linear-gradient(135deg, #a5b4fc 0%, #c084fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .hero p {
-      font-size: 1.25rem;
+
+    .hero-sub {
+      font-size: 1.2rem;
       color: var(--text-muted);
-      max-width: 700px;
-      margin: 0 auto 2.5rem;
+      max-width: 680px;
+      margin: 0 auto 2.75rem;
+      line-height: 1.7;
     }
+
     .hero-ctas {
       display: flex;
       justify-content: center;
       gap: 1.25rem;
       align-items: center;
+      flex-wrap: wrap;
     }
-    .features {
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 4.5rem;
+      padding-top: 3rem;
+      border-top: 1px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      margin-bottom: 0.35rem;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    /* ── Section shared ── */
+    .section {
       max-width: 1200px;
-      margin: 4rem auto;
-      padding: 0 2rem;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
     }
+
+    .section-eyebrow {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-secondary);
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
     .section-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.2rem;
-      font-weight: 700;
+      font-size: 2.4rem;
+      font-weight: 800;
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
     }
+
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 620px;
+      margin: 0 auto 3.5rem;
+      line-height: 1.7;
+    }
+
+    /* ── Feature grid ── */
     .grid-3 {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
+      gap: 1.75rem;
     }
-    .card-icon {
-      font-size: 2rem;
+
+    .feat-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), var(--accent-secondary), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feat-card:hover {
+      border-color: rgba(99, 102, 241, 0.25);
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .feat-card:hover::before {
+      opacity: 0.6;
+    }
+
+    .feat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
       margin-bottom: 1.25rem;
     }
-    .premium-card h3 {
+
+    .feat-card h3 {
       font-family: 'Outfit', sans-serif;
-      font-size: 1.35rem;
-      margin-bottom: 0.75rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: #fff;
     }
-    .premium-card p {
+
+    .feat-card p {
       color: var(--text-muted);
       font-size: 0.95rem;
+      line-height: 1.65;
     }
+
+    /* ── How it works ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      position: relative;
+    }
+
+    .step-item {
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .step-number {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 auto 1.25rem;
+      box-shadow: 0 0 24px rgba(99, 102, 241, 0.4);
+    }
+
+    .step-item h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .step-item p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    /* ── Model showcase strip ── */
+    .model-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .model-chip {
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 1.4rem 1.6rem;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .model-chip:hover {
+      border-color: rgba(99, 102, 241, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .model-chip-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-green  { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+    .dot-yellow { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+    .dot-indigo { background: #818cf8; box-shadow: 0 0 8px rgba(129, 140, 248, 0.6); }
+    .dot-purple { background: #a78bfa; box-shadow: 0 0 8px rgba(167, 139, 250, 0.6); }
+
+    .model-chip-info h4 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    .model-chip-info span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ── CTA banner ── */
+    .cta-banner {
+      max-width: 1100px;
+      margin: 2rem auto 5rem;
+      padding: 0 1.5rem;
+    }
+
+    .cta-inner {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(168, 85, 247, 0.08) 100%);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 20px;
+      padding: 3.5rem 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-inner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), var(--accent-secondary), transparent);
+    }
+
+    .cta-inner h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-inner p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 520px;
+      margin: 0 auto 2rem;
+      line-height: 1.65;
+    }
+
+    /* ── Code demo ── */
     .code-demo {
-      max-width: 900px;
-      margin: 6rem auto;
-      padding: 0 2rem;
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 1.5rem 5rem;
     }
+
+    .code-demo-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .code-demo-sub {
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 2.8rem;
-      }
-      .hero-ctas {
-        flex-direction: column;
-        gap: 1rem;
-      }
+      .hero h1        { font-size: 2.6rem; }
+      .hero-sub       { font-size: 1.05rem; }
+      .hero           { padding: 5rem 1.25rem 3rem; }
+      .hero-stats     { gap: 2rem; }
+      .stat-number    { font-size: 1.9rem; }
+      .section-title  { font-size: 1.9rem; }
+      .cta-inner      { padding: 2.5rem 1.5rem; }
+      .cta-inner h2   { font-size: 1.85rem; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1       { font-size: 2.1rem; }
+      .hero-stats    { gap: 1.5rem; }
+      .stat-number   { font-size: 1.6rem; }
+      .grid-3        { grid-template-columns: 1fr; }
+      .steps-grid    { grid-template-columns: 1fr; }
+      .model-strip   { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -94,7 +390,7 @@
 
   <header>
     <div class="nav-container">
-      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <a href="/" class="logo">🚀 <strong>AICore</strong> <span style="font-weight: 300; opacity: 0.85;">API</span></a>
       <nav>
         <a href="/" class="active">Home</a>
         <a href="/docs">Documentation</a>
@@ -106,56 +402,189 @@
   </header>
 
   <main>
+    <!-- ── HERO ── -->
     <section class="hero">
-      <h1>Consolidated High-Performance<br><span class="gradient-text">Kimi 2.6 Developer Gateway</span></h1>
-      <p>Secure, developer-first proxy for Moonshot Kimi models with built-in Puppeteer token rotation, atomic Supabase quota tracking, and ultra-low latency response stream caching.</p>
+      <div class="hero-eyebrow">
+        <span>✦</span> The #1 Free AI API for Developers
+      </div>
+      <h1>The <span class="gradient-text">Free AI API</span><br>Built for Serious Builders</h1>
+      <p class="hero-sub">
+        AICore API gives your applications direct, free access to state-of-the-art LLMs — with real-time streaming, secure key management, and a gateway engineered for high-throughput production workloads.
+      </p>
       <div class="hero-ctas">
-        <a href="/docs" class="btn-primary">Start Integrating</a>
-        <a href="/login" class="btn-secondary">Get API Key</a>
+        <a href="/docs" class="btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">Read the Docs</a>
+        <a href="/login" class="btn-secondary" style="padding: 0.75rem 2rem; font-size: 1rem;">Get Your Free API Key →</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-number">4</div>
+          <div class="stat-label">AI Models</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">&lt;1s</div>
+          <div class="stat-label">Stream Start Time</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">SSE</div>
+          <div class="stat-label">Real-Time Streaming</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">99%</div>
+          <div class="stat-label">Uptime SLA</div>
+        </div>
       </div>
     </section>
 
-    <section class="features">
-      <h2 class="section-title">Why Developers Choose Mine Kimi</h2>
+    <!-- ── FEATURES ── -->
+    <section class="section" style="padding-top: 2rem;">
+      <div class="section-eyebrow">Why AICore API</div>
+      <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+      <p class="section-sub">AICore API is designed from the ground up for developers who need reliable, fast, and flexible access to advanced AI language models.</p>
+
       <div class="grid-3">
-        <div class="premium-card">
-          <div class="card-icon">⚡</div>
-          <h3>Zero-Latency Lookup</h3>
-          <p>Features an in-memory parent_id history cache to reduce gRPC/Connect lookup overhead to absolute zero.</p>
+        <div class="feat-card">
+          <div class="feat-icon">⚡</div>
+          <h3>Blazing-Fast Responses</h3>
+          <p>Responses begin streaming in under a second. Our gateway is optimized for minimal time-to-first-token so your users never wait.</p>
         </div>
-        <div class="premium-card">
-          <div class="card-icon">🛡️</div>
-          <h3>Self-Healing Rotations</h3>
-          <p>Dynamic Puppeteer browser integration automatically recovers from expired sessions (401/403) in the background.</p>
+        <div class="feat-card">
+          <div class="feat-icon">🛡️</div>
+          <h3>Always-On Reliability</h3>
+          <p>Built-in session management means the gateway self-recovers from connection issues automatically — your API calls never drop.</p>
         </div>
-        <div class="premium-card">
-          <div class="card-icon">📊</div>
-          <h3>Atomic Quota Manager</h3>
-          <p>Supabase-backed API quota decrementing guards against concurrent request over-consumption reliably.</p>
+        <div class="feat-card">
+          <div class="feat-icon">🎛️</div>
+          <h3>Full Output Control</h3>
+          <p>Shape responses with persona, tone, format, audience, and length parameters. Get structured output every time — no prompt engineering required.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📡</div>
+          <h3>Real-Time SSE Streaming</h3>
+          <p>Native Server-Sent Events support lets you display AI responses token-by-token, creating fluid, chat-like experiences in any client.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">🔑</div>
+          <h3>Secure Key Management</h3>
+          <p>Each developer account gets a dedicated API key with quota controls. Manage, rotate, and monitor usage from your personal dashboard.</p>
+        </div>
+        <div class="feat-card">
+          <div class="feat-icon">📊</div>
+          <h3>Usage Analytics</h3>
+          <p>Track your request quota in real time from the developer console. Know exactly how much capacity you have remaining at a glance.</p>
         </div>
       </div>
     </section>
 
-    <section class="code-demo">
-      <h2 class="section-title" style="margin-bottom: 2rem;">blazing fast integration</h2>
-      <div class="code-block-header">
-        <span>cURL Request Example</span>
-        <span style="color: var(--accent-primary);">POST /api/chat</span>
+    <!-- ── HOW IT WORKS ── -->
+    <section class="section" style="background: rgba(255,255,255,0.01); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+      <div class="section-eyebrow">How It Works</div>
+      <h2 class="section-title">Three steps to integration</h2>
+      <p class="section-sub">AICore API is designed to go from signup to first response in minutes — no complex setup required.</p>
+
+      <div class="steps-grid">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <h3>Create an Account</h3>
+          <p>Sign up via the developer portal to instantly receive a personal API key with a starter quota included.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <h3>Pick Your Model</h3>
+          <p>Choose from four specialized AI models — from instant low-latency completions to deep research agents — based on your use case.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <h3>Send Your First Request</h3>
+          <p>Pass your API key in a header and post a JSON body. Stream the response, or collect the full reply — your choice.</p>
+        </div>
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <h3>Ship to Production</h3>
+          <p>Monitor usage from your dashboard and scale confidently. The gateway handles reliability under the hood.</p>
+        </div>
       </div>
-      <pre>curl -X POST http://localhost:3001/api/chat \
+    </section>
+
+    <!-- ── MODELS ── -->
+    <section class="section">
+      <div class="section-eyebrow">Model Lineup</div>
+      <h2 class="section-title">The right model for every task</h2>
+      <p class="section-sub">AICore API routes your requests to four Kimi 2.6 variants, each tuned for a specific class of workload.</p>
+
+      <div class="model-strip">
+        <div class="model-chip">
+          <div class="model-chip-dot dot-green"></div>
+          <div class="model-chip-info">
+            <h4>K2.6 Instant</h4>
+            <span>Ultra-low latency &middot; General purpose</span>
+          </div>
+        </div>
+        <div class="model-chip">
+          <div class="model-chip-dot dot-yellow"></div>
+          <div class="model-chip-info">
+            <h4>K2.6 Thinking</h4>
+            <span>Deep reasoning &middot; Code &amp; logic</span>
+          </div>
+        </div>
+        <div class="model-chip">
+          <div class="model-chip-dot dot-indigo"></div>
+          <div class="model-chip-info">
+            <h4>K2.6 Agent</h4>
+            <span>Web browsing &middot; Tool execution</span>
+          </div>
+        </div>
+        <div class="model-chip">
+          <div class="model-chip-dot dot-purple"></div>
+          <div class="model-chip-info">
+            <h4>K2.Swarm</h4>
+            <span>Multi-agent &middot; Deep research</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <a href="/models" class="btn-secondary" style="font-size: 0.9rem;">View full model specs →</a>
+      </div>
+    </section>
+
+    <!-- ── CODE DEMO ── -->
+    <div class="code-demo">
+      <h2 class="code-demo-title">Blazing fast integration</h2>
+      <p class="code-demo-sub">One endpoint. Works with any language that can send HTTP requests.</p>
+      <div class="code-block-header">
+        <span>Quick Integration — cURL</span>
+        <span style="color: var(--accent-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;">POST /api/chat</span>
+      </div>
+<pre>curl -X POST https://your-gateway.onrender.com/api/chat \
   -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "message": "Write a python quicksort script",
+    "message": "Explain quantum entanglement simply.",
     "model": "k2d6",
+    "tone": "educational",
+    "audience": "beginners",
+    "max_words": 80,
     "stream": false
   }'</pre>
-    </section>
+    </div>
+
+    <!-- ── CTA BANNER ── -->
+    <div class="cta-banner">
+      <div class="cta-inner">
+        <h2>Start building with <span class="gradient-text">AICore API</span> today</h2>
+        <p>Join developers already using the AICore API to power their AI features — free to get started, no credit card required.</p>
+        <div class="hero-ctas">
+          <a href="/login" class="btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">Create Free Account</a>
+          <a href="/docs" class="btn-secondary" style="padding: 0.75rem 2rem; font-size: 1rem;">Explore the Docs</a>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer>
     <div class="footer-container">
-      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 AICore API. All rights reserved.</span>
       <div class="status-badge">
         <div class="status-dot"></div>
         <span>API Gateway Online</span>

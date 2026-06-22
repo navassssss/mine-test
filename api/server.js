@@ -20,6 +20,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust Render's reverse proxy for accurate IP identification (fixes express-rate-limit error)
+app.set('trust proxy', 1);
+
 // Security Middlewares
 app.use(helmet({
   contentSecurityPolicy: false // Allow inline scripts/styles for the portal UI
@@ -44,8 +47,8 @@ const apiLimiter = rateLimit({
 // Apply rate limiter to API endpoints
 app.use('/api/', apiLimiter);
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true, limit: '2mb' }));
+app.use(bodyParser.json({ limit: '2mb' }));
 
 // --- Developer Authentication Portal & Dashboard Routes ---
 const authPublicDir = path.resolve(__dirname, 'supabase_auth/public');
@@ -111,6 +114,13 @@ let cachedParentId = null;
 
 // Asynchronously pre-fetch chat history parent ID at server start
 async function initializeParentIdCache() {
+  // In production, skip eager cache init to avoid triggering a session refresh + Puppeteer OOM.
+  // The cache will be lazily populated on the first actual /api/chat request.
+  if (process.env.NODE_ENV === 'production') {
+    console.log('[Cache Init] Skipping eager cache fetch in production (lazy mode). Cache will populate on first request.');
+    return;
+  }
+
   try {
     console.log(`[Cache Init] Pre-fetching latest parent_id for chat: ${config.LIVE_API_CHAT_ID}`);
     const msgRes = await api.listMessages(config.LIVE_API_CHAT_ID, 50);
@@ -263,6 +273,7 @@ app.post('/api/chat', async (req, res) => {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
+        res.setHeader('X-Accel-Buffering', 'no'); // Disable Nginx/Render proxy buffering for true streaming
       } else {
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.setHeader('Transfer-Encoding', 'chunked');
@@ -277,6 +288,18 @@ app.post('/api/chat', async (req, res) => {
         else if (chunk.chat_id) serverChatId = chunk.chat_id;
         else if (chunk.chat && chunk.chat.id) serverChatId = chunk.chat.id;
         else if (chunk.message && chunk.message.chatId) serverChatId = chunk.message.chatId;
+
+        // Check for structured stream errors yielded from parseConnectStream
+        if (chunk.__streamError) {
+          console.error('[Stream Error] Kimi API returned an error:', chunk.message);
+          if (isSSE) {
+            res.write(`data: ${JSON.stringify({ error: chunk.message })}\n\n`);
+          } else {
+            res.write(`\nError: ${chunk.message}`);
+          }
+          res.end();
+          return;
+        }
 
         // Capture assistant message ID
         if (chunk.message && chunk.message.role === 'assistant' && chunk.message.id) {

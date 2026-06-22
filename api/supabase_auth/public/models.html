@@ -3,14 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Supported Models - Mine Kimi API</title>
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="AICore" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <title>Supported Models — AICore API</title>
+  <meta name="description" content="Explore the AI models supported by AICore API, including Instant, Thinking, Agent, and Swarm variants. Compare latency, quotas, and find the right model for your workloads.">
+  <meta name="keywords" content="AICore API models, AI models comparison, K2.6 Instant, K2.6 Thinking, K2.6 Agent, AI API latency">
+  <meta property="og:title" content="Supported Models — AICore API">
+  <meta property="og:description" content="Explore the AI models supported by AICore API. Compare latency, quotas, and find the right model for your workloads.">
+  <meta property="og:type" content="website">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .content-section {
       max-width: 1100px;
-      margin: 6rem auto;
-      padding: 0 2rem;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
     }
     .page-title {
       font-family: 'Outfit', sans-serif;
@@ -25,10 +36,10 @@
       -webkit-text-fill-color: transparent;
     }
     .page-intro {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: var(--text-muted);
       text-align: center;
-      margin-bottom: 4rem;
+      margin-bottom: 3rem;
     }
     .model-key {
       font-family: 'JetBrains Mono', monospace;
@@ -46,11 +57,86 @@
       border-radius: 9999px;
       text-transform: uppercase;
       display: inline-block;
+      white-space: nowrap;
     }
-    .badge-instant { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .badge-thinking { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
-    .badge-agent { background-color: rgba(99, 102, 241, 0.1); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2); }
-    .badge-swarm { background-color: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2); }
+    .badge-instant  { background-color: rgba(16, 185, 129, 0.1);  color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .badge-thinking { background-color: rgba(245, 158, 11, 0.1);  color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .badge-agent    { background-color: rgba(99, 102, 241, 0.1);  color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2); }
+    .badge-swarm    { background-color: rgba(139, 92, 246, 0.1);  color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2); }
+
+    /* ---- Mobile card layout (hidden on desktop) ---- */
+    .model-cards {
+      display: none;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .model-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.25s;
+    }
+    .model-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), var(--accent-secondary), transparent);
+      opacity: 0.5;
+    }
+    .model-card:hover { border-color: rgba(99,102,241,0.3); }
+    .model-card-name {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.85rem;
+    }
+    .model-card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.65rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .model-card-row span:first-child {
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+    }
+    .model-card-key-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .model-card-desc {
+      margin-top: 0.85rem;
+      padding-top: 0.85rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* ---- Responsive breakpoints ---- */
+    @media (max-width: 700px) {
+      .premium-table-container { display: none; }  /* hide table */
+      .model-cards { display: flex; }              /* show cards  */
+      .page-title { font-size: 2.2rem; }
+      .content-section { margin: 2.5rem auto; padding: 0 1rem; }
+    }
+
+    @media (max-width: 480px) {
+      .page-title { font-size: 1.85rem; }
+      .page-intro { font-size: 1rem; margin-bottom: 2rem; }
+    }
   </style>
 </head>
 <body>
@@ -61,7 +147,7 @@
 
   <header>
     <div class="nav-container">
-      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <a href="/" class="logo">🚀 <strong>AICore</strong> <span style="font-weight: 300; opacity: 0.85;">API</span></a>
       <nav>
         <a href="/">Home</a>
         <a href="/docs">Documentation</a>
@@ -155,11 +241,96 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Mobile card layout (shown under 700px) -->
+    <div class="model-cards">
+
+      <div class="model-card">
+        <div class="model-card-name">K2.6 Instant</div>
+        <div class="model-card-row">
+          <span>Identifier</span>
+          <div class="model-card-key-row">
+            <code class="model-key">k2d6</code>
+            <button class="action-icon-btn" onclick="copyModelKey('k2d6', this)" title="Copy" style="width:28px;height:28px;padding:0;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card-row">
+          <span>Latency</span><span class="model-badge badge-instant">Low (&lt; 1s)</span>
+        </div>
+        <div class="model-card-row">
+          <span>Cost</span><span>1 Request</span>
+        </div>
+        <div class="model-card-desc">General-purpose conversation, low-latency tasks, translation.</div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-card-name">K2.6 Thinking</div>
+        <div class="model-card-row">
+          <span>Identifier</span>
+          <div class="model-card-key-row">
+            <code class="model-key">k2d6-thinking</code>
+            <button class="action-icon-btn" onclick="copyModelKey('k2d6-thinking', this)" title="Copy" style="width:28px;height:28px;padding:0;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card-row">
+          <span>Latency</span><span class="model-badge badge-thinking">Medium (3s–5s)</span>
+        </div>
+        <div class="model-card-row">
+          <span>Cost</span><span>1 Request</span>
+        </div>
+        <div class="model-card-desc">Reasoning, logical structure, code generation.</div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-card-name">K2.6 Agent</div>
+        <div class="model-card-row">
+          <span>Identifier</span>
+          <div class="model-card-key-row">
+            <code class="model-key">k2d6-agent</code>
+            <button class="action-icon-btn" onclick="copyModelKey('k2d6-agent', this)" title="Copy" style="width:28px;height:28px;padding:0;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card-row">
+          <span>Latency</span><span class="model-badge badge-agent">High (5s–8s)</span>
+        </div>
+        <div class="model-card-row">
+          <span>Cost</span><span>1 Request</span>
+        </div>
+        <div class="model-card-desc">Web search, real-time browsing, tool calling.</div>
+      </div>
+
+      <div class="model-card">
+        <div class="model-card-name">K2.Swarm</div>
+        <div class="model-card-row">
+          <span>Identifier</span>
+          <div class="model-card-key-row">
+            <code class="model-key">k2d6-agent-ultra</code>
+            <button class="action-icon-btn" onclick="copyModelKey('k2d6-agent-ultra', this)" title="Copy" style="width:28px;height:28px;padding:0;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="model-card-row">
+          <span>Latency</span><span class="model-badge badge-swarm">Variable (&gt;10s)</span>
+        </div>
+        <div class="model-card-row">
+          <span>Cost</span><span>1 Request</span>
+        </div>
+        <div class="model-card-desc">Deep research loops, multi-agent cooperative crawling.</div>
+      </div>
+
+    </div>
   </main>
 
   <footer>
     <div class="footer-container">
-      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 AICore API. All rights reserved.</span>
       <div class="status-badge">
         <div class="status-dot"></div>
         <span>API Gateway Online</span>

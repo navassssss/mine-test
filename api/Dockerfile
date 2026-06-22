@@ -1,4 +1,4 @@
-FROM node:18-slim
+FROM node:20-slim
 
 # Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
 # Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
@@ -20,12 +20,12 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY api/package*.json ./
+COPY package*.json ./
 
 RUN npm install
 
 # Bundle app source
-COPY api/ .
+COPY . .
 
 # Expose port (Render sets PORT env variable)
 EXPOSE 3001

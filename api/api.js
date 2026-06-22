@@ -45,7 +45,8 @@ async function fetchWithRetry(url, optionsOrFn, retries = 3, delay = 1500) {
         console.warn(`[API Client] Received HTTP ${res.status} (Expired Session). Triggering dynamic session refresh...`);
         // Single-flight lock handles queuing and token fetch via Web App
         await sessionStore.acquireFreshSession();
-        // Continue loop to retry with fresh headers
+        // Reset retry counter so we get a full fresh attempt with new tokens
+        i = 0;
         continue;
       }
 
@@ -62,8 +63,10 @@ async function fetchWithRetry(url, optionsOrFn, retries = 3, delay = 1500) {
       const causeStr = err.cause ? ` (Cause: ${err.cause.message || err.cause})` : '';
       console.warn(`[API Connection Retry ${i + 1}/${retries}] Failed fetching ${url}: ${err.message}${causeStr}`);
       
-      // On connection timeouts or socket failures, trigger session refresh to clear gateway block
-      if (err.message.includes('fetch failed') || err.message.includes('Timeout') || err.message.includes('timeout')) {
+      // On connection timeouts, only trigger session refresh in dev (Puppeteer available).
+      // In production, a network timeout is a network problem, not an auth problem.
+      if (process.env.NODE_ENV !== 'production' &&
+          (err.message.includes('fetch failed') || err.message.includes('Timeout') || err.message.includes('timeout'))) {
         try {
           console.warn("[API Client] Network error. Triggering background session refresh...");
           await sessionStore.acquireFreshSession();
@@ -182,12 +185,12 @@ export async function* parseConnectStream(responseStream) {
             if (!errorMsg) {
               errorMsg = meta.error.code || 'Unknown Kimi API Error';
             }
-            throw new Error(`Kimi API Error: ${errorMsg}`);
+            // Yield error as a structured object instead of throwing.
+            // Throwing inside an async generator leaves the SSE pipe open and the client hanging.
+            yield { __streamError: true, message: `Kimi API Error: ${errorMsg}` };
+            return; // terminate the generator cleanly
           }
         } catch (e) {
-          if (e.message.startsWith('Kimi API Error:')) {
-            throw e;
-          }
           console.error('Failed to parse metadata block:', e.message);
         }
       }

@@ -11,6 +11,10 @@ export async function refreshTokens() {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--no-zygote',
+        '--single-process',
         '--disable-web-security',
         '--disable-features=IsolateOrigins,site-per-process'
       ]
@@ -128,4 +132,12 @@ export async function refreshTokens() {
   }
 }
 
-sessionStore.registerRefreshHandler(refreshTokens);
+// Only register Puppeteer-based refresh in local dev.
+// In production (Render), Chrome requires 400MB+ RAM which exceeds the free tier limit.
+// Production credentials must be set as environment variables in Render's dashboard directly.
+if (process.env.NODE_ENV !== 'production') {
+  sessionStore.registerRefreshHandler(refreshTokens);
+  console.log('[Puppeteer] Token auto-refresh registered (dev mode).');
+} else {
+  console.log('[Puppeteer] Token auto-refresh DISABLED in production. Set BEARER_TOKEN, MINE_TEST_AUTH_COOKIE, CF_BM, X_MSH_SHIELD_DATA as env vars in Render dashboard.');
+}

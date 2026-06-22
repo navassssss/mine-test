@@ -5,7 +5,6 @@ import bodyParser from 'body-parser';
 import { marked } from 'marked';
 import { config } from './config.js';
 import * as api from './services/api.js';
-import { refreshTokens } from './services/puppeteer.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -172,58 +171,7 @@ app.get('/', async (req, res) => {
   res.send(render('chat_list', pageData));
 });
 
-// 2. Refresh Tokens Route
-app.get('/refresh', async (req, res) => {
-  try {
-    const result = await refreshTokens();
-    if (result.success) {
-      flash = {
-        message: 'Session refreshed successfully! Cookies and headers updated.',
-        type: 'alert-success'
-      };
-      res.redirect('/');
-    } else {
-      flash = {
-        message: `Token refresh failed: ${result.reason || result.error || 'Unknown error'}`,
-        type: 'alert-error'
-      };
-      res.redirect('/settings');
-    }
-  } catch (error) {
-    flash = {
-      message: `Token refresh error: ${error.message}`,
-      type: 'alert-error'
-    };
-    res.redirect('/settings');
-  }
-});
 
-// Secure internal webhook to trigger Puppeteer token refresh on request
-app.post('/api/internal/refresh-session', async (req, res) => {
-  const authHeader = req.headers['authorization'];
-  if (!authHeader || authHeader !== `Bearer ${config.BEARER_TOKEN}`) {
-    return res.status(401).json({ success: false, error: 'Unauthorized internal call' });
-  }
-
-  try {
-    console.log('[Internal Webhook] Received token refresh trigger...');
-    const result = await refreshTokens();
-    if (result.success) {
-      res.json({
-        success: true,
-        CF_BM: result.CF_BM,
-        X_MSH_SHIELD_DATA: result.X_MSH_SHIELD_DATA
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: result.reason || result.error || 'Refresh returned unsuccessful status'
-      });
-    }
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-});
 
 // 3. Settings Form Route
 app.get('/settings', (req, res) => {

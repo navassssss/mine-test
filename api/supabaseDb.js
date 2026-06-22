@@ -4,6 +4,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { config } from './config.js';
 
+import WebSocket from 'ws';
+
 let supabaseAdmin = null;
 let warnedAboutKey = false;
 
@@ -17,6 +19,9 @@ function getSupabaseAdmin() {
     supabaseAdmin = createClient(url, serviceKey, {
       auth: {
         persistSession: false
+      },
+      realtime: {
+        transport: WebSocket
       }
     });
     console.log('[Supabase DB] Service client initialized successfully.');

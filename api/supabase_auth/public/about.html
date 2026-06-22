@@ -3,14 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - Mine Kimi API</title>
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="AICore" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <title>About — AICore API Developer Platform</title>
+  <meta name="description" content="Learn about the mission and core pillars of AICore API. Discover how our self-healing AI gateway delivers high-performance access to advanced LLMs for mission-critical applications.">
+  <meta name="keywords" content="AICore API, AI gateway, advanced LLMs, high-performance API, AI models, AI developers, self-healing API">
+  <meta property="og:title" content="About — AICore API Developer Platform">
+  <meta property="og:description" content="Discover how our self-healing AI gateway delivers high-performance access to advanced LLMs for mission-critical applications.">
+  <meta property="og:type" content="website">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .content-section {
       max-width: 900px;
-      margin: 6rem auto;
-      padding: 0 2rem;
+      margin: 4rem auto;
+      padding: 0 1.5rem;
     }
     .page-title {
       font-family: 'Outfit', sans-serif;
@@ -28,16 +39,26 @@
       font-size: 1.2rem;
       color: var(--text-muted);
       text-align: center;
-      margin-bottom: 4rem;
+      margin-bottom: 3rem;
     }
     .about-card-space {
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
+    }
+    /* Center single-topic cards (mission / vision) */
+    .about-card-space.centered-card {
+      text-align: center;
+    }
+    .about-card-space.centered-card h2 {
+      justify-content: center;
     }
     .premium-card h2 {
       font-family: 'Outfit', sans-serif;
       font-size: 1.8rem;
       margin-bottom: 1.25rem;
       color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     .premium-card p {
       font-size: 1.05rem;
@@ -47,7 +68,7 @@
     }
     .pillars-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.5rem;
       margin-top: 2rem;
     }
@@ -77,6 +98,20 @@
       color: var(--text-muted);
       line-height: 1.5;
     }
+
+    @media (max-width: 640px) {
+      .content-section { margin: 2rem auto; padding: 0 1rem; }
+      .page-title { font-size: 2.2rem; }
+      .page-intro { font-size: 1rem; margin-bottom: 2rem; }
+      .premium-card h2 { font-size: 1.5rem; }
+      .premium-card p { font-size: 0.95rem; }
+      .pillars-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .pillar-item { padding: 1.25rem; }
+    }
+
+    @media (max-width: 480px) {
+      .page-title { font-size: 1.9rem; }
+    }
   </style>
 </head>
 <body>
@@ -87,7 +122,7 @@
 
   <header>
     <div class="nav-container">
-      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <a href="/" class="logo">🚀 <strong>AICore</strong> <span style="font-weight: 300; opacity: 0.85;">API</span></a>
       <nav>
         <a href="/">Home</a>
         <a href="/docs">Documentation</a>
@@ -102,9 +137,9 @@
     <h1 class="page-title">About <span class="gradient-text">Our Platform</span></h1>
     <p class="page-intro">Learn how our gateway delivers high-performance access to advanced LLMs.</p>
 
-    <div class="premium-card about-card-space">
+    <div class="premium-card about-card-space centered-card">
       <h2>The Mission</h2>
-      <p style="margin-bottom: 0;">Mine Kimi API was built to democratize high-concurrency developer access to Kimi's advanced LLMs. Official channels lack robust session handling and failover systems that developers need to build mission-critical products. We bridge this gap by introducing a self-healing API Gateway.</p>
+      <p style="margin-bottom: 0;">AICore API was built to democratize high-concurrency developer access to advanced AI language models. Official channels lack robust session handling and failover systems that developers need to build mission-critical products. We bridge this gap by introducing a self-healing AI Gateway engineered for production.</p>
     </div>
 
     <div class="premium-card about-card-space">
@@ -130,7 +165,7 @@
       </div>
     </div>
 
-    <div class="premium-card about-card-space">
+    <div class="premium-card about-card-space centered-card">
       <h2>The Vision</h2>
       <p style="margin-bottom: 0;">Shaping the future of high-frequency model proxies. We provide developers with a rock-solid, production-ready foundation to orchestrate reasoning agents, web search flows, and deep crawls without session-level maintenance.</p>
     </div>
@@ -138,7 +173,7 @@
 
   <footer>
     <div class="footer-container">
-      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 AICore API. All rights reserved.</span>
       <div class="status-badge">
         <div class="status-dot"></div>
         <span>API Gateway Online</span>

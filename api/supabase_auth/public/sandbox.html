@@ -3,12 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive API Sandbox - Mine Kimi API</title>
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="AICore" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <title>Interactive API Sandbox — AICore API</title>
+  <meta name="description" content="Test and experiment with the AICore API in real-time. Use the interactive developer sandbox to tweak model parameters, generate code snippets, and view live SSE streams.">
+  <meta name="keywords" content="AICore API sandbox, AI API testing, interactive API playground, code snippets generator, live SSE stream test">
+  <meta property="og:title" content="Interactive API Sandbox — AICore API">
+  <meta property="og:description" content="Test and experiment with the AICore API in real-time using our interactive developer sandbox playground.">
+  <meta property="og:type" content="website">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <style>
     .sandbox-page-container {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 4rem auto;
       padding: 0 1.5rem;
     }
@@ -18,7 +29,7 @@
     }
     .sandbox-page-header h1 {
       font-family: 'Outfit', sans-serif;
-      font-size: 2.6rem;
+      font-size: 2.8rem;
       font-weight: 800;
       background: linear-gradient(135deg, #fff 40%, var(--text-muted) 100%);
       -webkit-background-clip: text;
@@ -28,14 +39,63 @@
     }
     .sandbox-page-header p {
       color: var(--text-muted);
-      font-size: 1.1rem;
+      font-size: 1.15rem;
     }
     .sandbox-workspace {
       display: grid;
-      grid-template-columns: 1.1fr 1fr;
+      grid-template-columns: 1.2fr 1fr;
       gap: 2.5rem;
       align-items: start;
     }
+    
+    .sandbox-section-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+      margin-top: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      text-transform: none;
+      font-weight: 500;
+      letter-spacing: normal;
+    }
+    
+    .checkbox-label input {
+      accent-color: var(--accent-primary);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    
     .sandbox-terminal-section {
       display: flex;
       flex-direction: column;
@@ -49,19 +109,44 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.9rem;
       color: #94a3b8;
-      height: 380px;
-      min-height: 380px;
+      height: 480px;
+      min-height: 480px;
       overflow-y: auto;
       white-space: pre-wrap;
       box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
     }
-    @media (max-width: 900px) {
+    
+    @media (max-width: 1024px) {
       .sandbox-workspace {
         grid-template-columns: 1fr;
       }
       .sandbox-terminal {
-        height: 250px;
-        min-height: 250px;
+        height: 350px;
+        min-height: 350px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .sandbox-workspace {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .sandbox-page-container {
+        margin: 2rem auto;
+      }
+      .premium-card[style*="padding: 2.2rem"],
+      .premium-card {
+        padding: 1.5rem !important;
+      }
+      .sandbox-terminal {
+        height: 280px;
+        min-height: 280px;
+        font-size: 0.8rem;
+      }
+      #curl-display {
+        height: 140px !important;
+        max-height: 140px !important;
+        font-size: 0.75rem !important;
       }
     }
   </style>
@@ -74,7 +159,7 @@
 
   <header>
     <div class="nav-container">
-      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <a href="/" class="logo">🚀 <strong>AICore</strong> <span style="font-weight: 300; opacity: 0.85;">API</span></a>
       <nav>
         <a href="/">Home</a>
         <a href="/docs">Documentation</a>
@@ -88,35 +173,99 @@
   <main class="sandbox-page-container">
     <div class="sandbox-page-header">
       <h1>Interactive <span class="gradient-text">API Sandbox</span></h1>
-      <p>Configure parameters, preview generated snippets, and stream requests in real-time.</p>
+      <p>Configure advanced parameters, explore tone and format options, and inspect real-time responses.</p>
     </div>
 
     <div class="sandbox-workspace">
       <!-- Left: Form Controls and Code Snippet -->
-      <div class="premium-card" style="padding: 2.5rem;">
+      <div class="premium-card" style="padding: 2.2rem;">
+        
+        <!-- General Section -->
+        <div class="sandbox-section-title">⚙️ Core Parameters</div>
+        
         <div class="form-group">
           <label for="sb-api-key">API Key</label>
           <input type="text" id="sb-api-key" placeholder="Enter your x-api-key..." value="">
         </div>
 
-        <div class="form-group">
-          <label for="sb-model">Model</label>
-          <select id="sb-model">
-            <option value="k2d6">K2.6 Instant (k2d6)</option>
-            <option value="k2d6-thinking">K2.6 Thinking (k2d6-thinking)</option>
-            <option value="k2d6-agent">K2.6 Agent (k2d6-agent)</option>
-            <option value="k2d6-agent-ultra">K2.Swarm (k2d6-agent-ultra)</option>
-          </select>
+        <div class="grid-2col">
+          <div class="form-group">
+            <label for="sb-model">Model</label>
+            <select id="sb-model">
+              <option value="k2d6">K2.6 Instant (k2d6)</option>
+              <option value="k2d6-thinking">K2.6 Thinking (k2d6-thinking)</option>
+              <option value="k2d6-agent">K2.6 Agent (k2d6-agent)</option>
+              <option value="k2d6-agent-ultra">K2.Swarm (k2d6-agent-ultra)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="sb-max-words">Max Words (Optional)</label>
+            <input type="number" id="sb-max-words" placeholder="e.g. 100" min="1">
+          </div>
         </div>
 
         <div class="form-group">
           <label for="sb-message">Message Prompt</label>
-          <textarea id="sb-message" rows="3" placeholder="Say hello to Kimi...">Hello, Kimi! Summarize your capabilities in one line.</textarea>
+          <textarea id="sb-message" rows="3" placeholder="Enter your query...">Summarize the key events of quantum physics history.</textarea>
         </div>
 
         <div class="form-group">
           <label for="sb-instructions">Custom System Instructions (Optional)</label>
-          <input type="text" id="sb-instructions" placeholder="e.g. Keep answers technical">
+          <input type="text" id="sb-instructions" placeholder="e.g. Focus on experimental discoveries">
+        </div>
+
+        <!-- Persona Section -->
+        <div class="sandbox-section-title">🎭 Persona & Style</div>
+        
+        <div class="grid-2col">
+          <div class="form-group">
+            <label for="sb-role">Role / Persona</label>
+            <input type="text" id="sb-role" placeholder="e.g. Technical Educator, Data Analyst">
+          </div>
+          <div class="form-group">
+            <label for="sb-tone">Tone</label>
+            <input type="text" id="sb-tone" placeholder="e.g. Academic, Encouraging, Direct">
+          </div>
+        </div>
+
+        <div class="grid-2col">
+          <div class="form-group">
+            <label for="sb-audience">Audience</label>
+            <input type="text" id="sb-audience" placeholder="e.g. Undergraduates, Executives">
+          </div>
+          <div class="form-group">
+            <label for="sb-language">Language</label>
+            <input type="text" id="sb-language" placeholder="e.g. English, French, Spanish">
+          </div>
+        </div>
+
+        <!-- Output Formatting Section -->
+        <div class="sandbox-section-title">📄 Output Structure & Format</div>
+        
+        <div class="grid-2col">
+          <div class="form-group">
+            <label for="sb-format">Output Format</label>
+            <input type="text" id="sb-format" placeholder="e.g. Markdown outline, Plain text">
+          </div>
+          <div class="form-group">
+            <label for="sb-structure">Layout Structure</label>
+            <input type="text" id="sb-structure" placeholder="e.g. Intro-Details-Summary">
+          </div>
+        </div>
+
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="sb-stream" checked>
+            <span>Stream response</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="sb-no-emojis">
+            <span>No Emojis</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="sb-bullets-only">
+            <span>Bullets Only</span>
+          </label>
         </div>
 
         <!-- Request snippet tabs -->
@@ -139,9 +288,16 @@
           <span>🚀</span> Send API Request
         </button>
 
-        <div class="premium-card" style="padding: 2rem; flex: 1;">
-          <div class="terminal-title" style="margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; font-weight: 700; color: #fff;">Response Console</div>
-          <div class="sandbox-terminal" id="terminal-display">Response stream output will display here in real-time...</div>
+        <div class="premium-card" style="padding: 2rem; flex: 1; display: flex; flex-direction: column;">
+          <div class="terminal-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+            <div class="terminal-title" style="font-weight: 700; color: #fff; white-space: nowrap;">Response Console</div>
+            <div class="terminal-metrics" id="terminal-metrics" style="display: flex; flex-wrap: wrap; gap: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); opacity: 0; transition: opacity 0.3s ease;">
+              <span style="white-space: nowrap;">TTFB: <span id="metric-ttfb" style="color: var(--accent-primary);">-- ms</span></span>
+              <span style="white-space: nowrap;">Total: <span id="metric-total" style="color: var(--accent-secondary);">-- ms</span></span>
+              <span style="white-space: nowrap;">Speed: <span id="metric-speed" style="color: #10b981;">-- tok/s</span></span>
+            </div>
+          </div>
+          <div class="sandbox-terminal" id="terminal-display" style="flex: 1;">Response stream output will display here in real-time...</div>
         </div>
       </div>
     </div>
@@ -149,7 +305,7 @@
 
   <footer>
     <div class="footer-container">
-      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Mine Kimi. All rights reserved.</span>
+      <span style="font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 AICore API. All rights reserved.</span>
       <div class="status-badge">
         <div class="status-dot"></div>
         <span>API Gateway Online</span>
@@ -171,6 +327,17 @@
     const modelSelect = document.getElementById('sb-model');
     const messageInput = document.getElementById('sb-message');
     const instructionsInput = document.getElementById('sb-instructions');
+    const roleInput = document.getElementById('sb-role');
+    const toneInput = document.getElementById('sb-tone');
+    const audienceInput = document.getElementById('sb-audience');
+    const languageInput = document.getElementById('sb-language');
+    const formatInput = document.getElementById('sb-format');
+    const structureInput = document.getElementById('sb-structure');
+    const maxWordsInput = document.getElementById('sb-max-words');
+    const streamCheckbox = document.getElementById('sb-stream');
+    const noEmojisCheckbox = document.getElementById('sb-no-emojis');
+    const bulletsOnlyCheckbox = document.getElementById('sb-bullets-only');
+    
     const curlDisplay = document.getElementById('curl-display');
     const terminal = document.getElementById('terminal-display');
     
@@ -184,20 +351,33 @@
       updateCodeSnippet();
     }
 
+    function buildPayload() {
+      let payload = {
+        message: messageInput.value,
+        model: modelSelect.value,
+        stream: streamCheckbox.checked
+      };
+
+      if (instructionsInput.value.trim()) payload.instructions = instructionsInput.value.trim();
+      if (roleInput.value.trim()) payload.role = roleInput.value.trim();
+      if (toneInput.value.trim()) payload.tone = toneInput.value.trim();
+      if (audienceInput.value.trim()) payload.audience = audienceInput.value.trim();
+      if (languageInput.value.trim()) payload.language = languageInput.value.trim();
+      if (formatInput.value.trim()) payload.format = formatInput.value.trim();
+      if (structureInput.value.trim()) payload.structure = structureInput.value.trim();
+      
+      const maxWordsVal = parseInt(maxWordsInput.value, 10);
+      if (!isNaN(maxWordsVal)) payload.max_words = maxWordsVal;
+      
+      if (noEmojisCheckbox.checked) payload.no_emojis = true;
+      if (bulletsOnlyCheckbox.checked) payload.bullets_only = true;
+
+      return payload;
+    }
+
     function updateCodeSnippet() {
       const apiKeyVal = apiKeyInput.value || 'YOUR_API_KEY';
-      const modelVal = modelSelect.value;
-      const messageVal = messageInput.value;
-      const instVal = instructionsInput.value;
-
-      let payload = {
-        message: messageVal,
-        model: modelVal,
-        stream: true
-      };
-      if (instVal) {
-        payload.instructions = instVal;
-      }
+      const payload = buildPayload();
 
       if (activeTab === 'fetch') {
         const fetchCode = `fetch("${window.location.origin}/api/chat", {\n` +
@@ -218,8 +398,15 @@
       }
     }
 
-    [apiKeyInput, modelSelect, messageInput, instructionsInput].forEach(el => {
+    // Attach listeners
+    [
+      apiKeyInput, modelSelect, messageInput, instructionsInput,
+      roleInput, toneInput, audienceInput, languageInput,
+      formatInput, structureInput, maxWordsInput,
+      streamCheckbox, noEmojisCheckbox, bulletsOnlyCheckbox
+    ].forEach(el => {
       el.addEventListener('input', updateCodeSnippet);
+      el.addEventListener('change', updateCodeSnippet);
     });
 
     function copyCode() {
@@ -258,53 +445,150 @@
         return;
       }
 
-      terminal.textContent = '> Establishing stream connection...\n';
+      const payload = buildPayload();
+      const wantStream = payload.stream;
+
+      // Metrics UI setup
+      const metricsContainer = document.getElementById('terminal-metrics');
+      const elTtfb = document.getElementById('metric-ttfb');
+      const elTotal = document.getElementById('metric-total');
+      const elSpeed = document.getElementById('metric-speed');
       
-      const modelVal = modelSelect.value;
-      const messageVal = messageInput.value;
-      const instVal = instructionsInput.value;
+      metricsContainer.style.opacity = '1';
+      elTtfb.textContent = '-- ms';
+      elTotal.textContent = '-- ms';
+      elSpeed.textContent = '-- tok/s';
 
-      let payload = {
-        message: messageVal,
-        model: modelVal,
-        stream: true
-      };
-      if (instVal) {
-        payload.instructions = instVal;
-      }
+      const startTime = performance.now();
+      let firstByteTime = null;
+      let tokenCount = 0; // Approximate
 
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKeyVal
-          },
-          body: JSON.stringify(payload)
-        });
+      if (wantStream) {
+        terminal.textContent = '> Establishing SSE stream connection...\n';
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'text/event-stream',
+              'x-api-key': apiKeyVal
+            },
+            body: JSON.stringify(payload)
+          });
 
-        if (!response.ok) {
-          const errData = await response.json().catch(() => ({}));
-          throw new Error(errData.error || `HTTP ${response.status} ${response.statusText}`);
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder('utf-8');
-        terminal.textContent += '> Stream opened. Receiving chunks...\n\n';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            terminal.textContent += '\n\n> [Stream Finished]';
-            break;
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || `HTTP ${response.status} ${response.statusText}`);
           }
-          const chunk = decoder.decode(value, { stream: true });
-          terminal.textContent += chunk;
-          terminal.scrollTop = terminal.scrollHeight; // Autoscroll
-        }
 
-      } catch (err) {
-        terminal.textContent += `\n❌ Error: ${err.message}`;
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          terminal.textContent += '> Stream opened. Receiving tokens...\n\n';
+
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+              const endTime = performance.now();
+              const totalTime = (endTime - startTime).toFixed(0);
+              elTotal.textContent = `${totalTime} ms`;
+              
+              if (firstByteTime) {
+                // Approximate speed (1 token ~ 4 characters of output)
+                const tokens = Math.max(1, Math.floor(tokenCount / 4));
+                const sec = (endTime - firstByteTime) / 1000;
+                const speed = sec > 0 ? (tokens / sec).toFixed(1) : 0;
+                elSpeed.textContent = `${speed} tok/s`;
+              }
+              
+              terminal.textContent += `\n\n> [Stream Finished in ${totalTime}ms]`;
+              break;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop();
+
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed || !trimmed.startsWith('data:')) continue;
+
+              const dataStr = trimmed.slice(5).trim();
+              if (dataStr === '[DONE]') {
+                const endTime = performance.now();
+                const totalTime = (endTime - startTime).toFixed(0);
+                elTotal.textContent = `${totalTime} ms`;
+                
+                if (firstByteTime) {
+                  const tokens = Math.max(1, Math.floor(tokenCount / 4));
+                  const sec = (endTime - firstByteTime) / 1000;
+                  const speed = sec > 0 ? (tokens / sec).toFixed(1) : 0;
+                  elSpeed.textContent = `${speed} tok/s`;
+                }
+
+                terminal.textContent += `\n\n> [Stream Finished in ${totalTime}ms]`;
+                return;
+              }
+
+              try {
+                const parsed = JSON.parse(dataStr);
+                if (parsed.error) {
+                  terminal.textContent += `\n❌ Server Error: ${parsed.error}`;
+                  return;
+                }
+                if (parsed.delta) {
+                  if (!firstByteTime) {
+                    firstByteTime = performance.now();
+                    const ttfb = (firstByteTime - startTime).toFixed(0);
+                    elTtfb.textContent = `${ttfb} ms`;
+                  }
+                  tokenCount += parsed.delta.length;
+                  terminal.textContent += parsed.delta;
+                  terminal.scrollTop = terminal.scrollHeight;
+                }
+              } catch {
+                // Ignore parsing errors of incomplete deltas
+              }
+            }
+          }
+        } catch (err) {
+          terminal.textContent += `\n❌ Error: ${err.message}`;
+        }
+      } else {
+        terminal.textContent = '> Sending request (non-streaming mode). Please wait...\n';
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'x-api-key': apiKeyVal
+            },
+            body: JSON.stringify(payload)
+          });
+
+          firstByteTime = performance.now();
+          const ttfb = (firstByteTime - startTime).toFixed(0);
+          elTtfb.textContent = `${ttfb} ms`;
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || `HTTP ${response.status} ${response.statusText}`);
+          }
+
+          const resJson = await response.json();
+          const endTime = performance.now();
+          const totalTime = (endTime - startTime).toFixed(0);
+          elTotal.textContent = `${totalTime} ms`;
+          
+          const tokens = Math.floor((resJson.response?.length || 0) / 4);
+          elSpeed.textContent = `${tokens} tok (total)`;
+          
+          terminal.textContent = `> Response received in ${totalTime}ms:\n\n${resJson.response}`;
+        } catch (err) {
+          terminal.textContent += `\n❌ Error: ${err.message}`;
+        }
       }
     }
 

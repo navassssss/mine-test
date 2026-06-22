@@ -1,14 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Developer Dashboard - Mine Kimi API</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="AICore" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <title>Developer Dashboard - AICore API</title>
+  <meta name="description" content="Manage your AICore API developer account. View your API credentials, monitor real-time usage quotas, and copy quick start integration snippets.">
+  <meta name="keywords" content="AICore API dashboard, developer console, API key management, quota tracking, API integration">
+  <meta name="robots" content="noindex, nofollow">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <!-- Supabase JS Client CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
   <div class="glow-container">
     <div class="glow-circle glow-1"></div>
@@ -17,7 +30,7 @@
 
   <header>
     <div class="nav-container">
-      <a href="/" class="logo">🚀 Mine Kimi API</a>
+      <a href="/" class="logo">🚀 <strong>AICore</strong> <span style="font-weight: 300; opacity: 0.85;">API</span></a>
       <nav>
         <a href="/">Home</a>
         <a href="/docs">Documentation</a>
@@ -50,23 +63,28 @@
           <div class="premium-card">
             <h2>🔑 API Credentials</h2>
             <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">
-              Provide this unique Bearer credential in the <code>x-api-key</code> request header to authenticate with the Kimi gateway.
+              Provide this unique Bearer credential in the <code>x-api-key</code> request header to authenticate with
+              the Kimi gateway.
             </p>
             <div class="key-display-wrapper">
               <span class="key-value-text" id="api-key-value">mine_pub_••••••••••••••••••••</span>
               <div class="key-actions">
                 <!-- Eye Toggle icon -->
                 <button class="action-icon-btn" onclick="toggleKeyVisibility()" title="Show/Hide Key">
-                  <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <!-- Eye outline SVG -->
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 </button>
                 <!-- Copy icon -->
                 <button class="action-icon-btn" onclick="copyApiKey()" title="Copy Key">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
                   </svg>
                 </button>
               </div>
@@ -89,7 +107,8 @@
 
         <!-- Right: Usage Stats -->
         <div style="display: flex; flex-direction: column;">
-          <div class="premium-card" style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+          <div class="premium-card"
+            style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
             <div>
               <h2>📊 Usage Status</h2>
               <p style="font-size: 0.9rem; color: var(--text-muted);">
@@ -138,7 +157,7 @@
       // 1. Enforce Auth Guard Middleware
       const session = await checkAuth(true);
       if (!session) return;
-      
+
       // 2. Fetch and sync profile database details
       await syncDashboardData(session.user);
     });
@@ -164,7 +183,7 @@
         if (!profile) {
           console.log('Initializing profile for first login...');
           const meta = user.user_metadata || {};
-          
+
           const { data: newProfile, error: insertError } = await client
             .from('profiles')
             .insert({
@@ -183,15 +202,15 @@
 
         // Set UI details
         document.getElementById('welcome-message').innerText = `Hello, ${profile.full_name}`;
-        
+
         rawApiKey = profile.api_key;
         renderApiKey();
 
         // Update quota progress bar and counts
         const remaining = profile.requests_remaining;
         const total = 30;
-        document.getElementById('quota-text').innerText = `${remaining} / ${total}`;
-        
+        total >= remaining ? document.getElementById('quota-text').innerText = `${remaining} / ${total}` : document.getElementById('quota-text').innerText = `${remaining} / ${remaining}`;
+
         const pct = Math.max(0, Math.min(100, (remaining / total) * 100));
         document.getElementById('quota-bar-fill').style.width = `${pct}%`;
 
@@ -252,4 +271,5 @@
     }
   </script>
 </body>
+
 </html>

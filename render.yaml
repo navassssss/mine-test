@@ -9,7 +9,7 @@ services:
       - key: PORT
         value: "3000"
       - key: MINE_TEST_DOMAIN
-        value: "kimi.com"
+        value: "kimi.moonshot.cn"
       - key: BEARER_TOKEN
         sync: false
       - key: MINE_TEST_AUTH_COOKIE

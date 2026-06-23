@@ -198,7 +198,7 @@ export async function* parseConnectStream(responseStream) {
   }
 }
 
-function mapModelToPayload(model, message, chatId, parentId) {
+function mapModelToPayload(model, message, chatId, parentId, fileIds = []) {
   let scenario = "SCENARIO_K2D5";
   let thinking = false;
   let agentMode = null;
@@ -222,17 +222,24 @@ function mapModelToPayload(model, message, chatId, parentId) {
     scenario = model;
   }
 
+  let blocks = [{ message_id: "", text: { content: message } }];
+  if (fileIds && fileIds.length > 0) {
+    fileIds.forEach(id => {
+      blocks.push({ file: { id: id, status: "PROCESS_STATUS_SUCCESS" } });
+    });
+  }
+
   const payload = {
     scenario: scenario,
     tools: [{ type: "TOOL_TYPE_SEARCH", search: {} }],
     message: {
       role: "user",
-      blocks: [{ message_id: "", text: { content: message } }],
+      blocks: blocks,
       scenario: scenario
     },
     options: {
       thinking: thinking,
-      enable_plugin: false
+      enable_plugin: fileIds && fileIds.length > 0 ? true : false
     }
   };
 
@@ -257,11 +264,11 @@ function mapModelToPayload(model, message, chatId, parentId) {
   return payload;
 }
 
-export async function sendChatMessage(message, chatId, parentId, model = 'SCENARIO_K2D5') {
+export async function sendChatMessage(message, chatId, parentId, model = 'SCENARIO_K2D5', fileIds = []) {
   const brand = getBrand();
   const url = `https://${config.MINE_TEST_DOMAIN}/apiv2/${brand}.gateway.chat.v1.ChatService/Chat`;
 
-  const payload = mapModelToPayload(model, message, chatId, parentId);
+  const payload = mapModelToPayload(model, message, chatId, parentId, fileIds);
   const jsonBody = JSON.stringify(payload);
   const framedBody = frameMessage(jsonBody);
 
@@ -355,4 +362,57 @@ export async function listMessages(chatId, pageSize = 100) {
     body: JSON.stringify({ chat_id: chatId, page_size: pageSize })
   }));
   return res.json();
+}
+
+export async function uploadImage(base64Str) {
+  const matches = base64Str.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+  if (!matches || matches.length !== 3) {
+    throw new Error('Invalid base64 string');
+  }
+  const mime = matches[1];
+  const buffer = Buffer.from(matches[2], 'base64');
+  const ext = mime.split('/')[1] || 'jpeg';
+
+  const boundary = '----WebKitFormBoundaryTunLz2fxMOGmBrV9';
+  const header = Buffer.from(
+    `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="image.${ext}"\r\nContent-Type: ${mime}\r\n\r\n`,
+    'utf-8'
+  );
+  const footer = Buffer.from(`\r\n--${boundary}--\r\n`, 'utf-8');
+  const bodyBuffer = Buffer.concat([header, buffer, footer]);
+
+  const uploadRes = await fetchWithRetry(`https://${config.MINE_TEST_DOMAIN}/apiv2-files/file/upload`, () => {
+    const headers = getHeaders();
+    headers['content-type'] = `multipart/form-data; boundary=${boundary}`;
+    return {
+      method: "POST",
+      headers: headers,
+      body: bodyBuffer
+    };
+  });
+  
+  const uploadData = await uploadRes.json();
+  if (!uploadData || !uploadData.file || !uploadData.file.id) {
+    throw new Error("Failed to get file ID from upload response");
+  }
+  const fileId = uploadData.file.id;
+  
+  for (let i = 0; i < 15; i++) {
+    const pollRes = await fetchWithRetry(`https://${config.MINE_TEST_DOMAIN}/apiv2-files/kimi.gateway.file.v1.FileService/GetFileParseProgress`, () => {
+      const headers = getHeaders();
+      headers['content-type'] = "application/json";
+      return {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ file_ids: [fileId] })
+      };
+    });
+    const pollData = await pollRes.json();
+    const status = pollData.progresses && pollData.progresses[0] ? pollData.progresses[0].status : null;
+    if (status === 'PROCESS_STATUS_SUCCESS') {
+      return fileId;
+    }
+    await new Promise(r => setTimeout(r, 1000));
+  }
+  return fileId;
 }
